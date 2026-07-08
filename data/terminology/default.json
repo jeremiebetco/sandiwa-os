@@ -1,0 +1,42 @@
+{
+  "version": "1",
+  "modules": {
+    "intake": {
+      "label": "Request",
+      "description": "Report a concern or maintenance issue",
+      "navLabel": "Requests"
+    },
+    "payments": {
+      "label": "Dues & Fees",
+      "description": "Pay association dues and view receipts",
+      "navLabel": "Payments"
+    },
+    "ledger": {
+      "label": "Community Fund",
+      "description": "Track fund disbursements and repayments",
+      "navLabel": "Fund"
+    },
+    "polls": {
+      "label": "Vote",
+      "description": "Participate in HOA polls and resolutions",
+      "navLabel": "Votes"
+    },
+    "broadcasts": {
+      "label": "Alert",
+      "description": "Receive urgent HOA alerts",
+      "navLabel": "Alerts"
+    }
+  },
+  "roles": {
+    "org_admin": { "label": "HOA Administrator" },
+    "manager": { "label": "Manager" },
+    "committee_lead": { "label": "Committee Chair" },
+    "staff": { "label": "Staff" },
+    "member": { "label": "Homeowner" }
+  },
+  "fields": {
+    "unit": { "label": "Unit / Lot" },
+    "member_no": { "label": "Homeowner ID" },
+    "share_capital": { "label": "Share Balance" }
+  }
+}

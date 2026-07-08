@@ -1,1 +1,76 @@
-# sandiwa-os
+# Sandiwa OS — HOA Edition
+
+Multi-tenant homeowners association (HOA) operations platform for the Philippines. This POC runs as a Nuxt 4 SPA with client-side tenant resolution, Pinia state, and localStorage persistence.
+
+## Product scope
+
+**HOA-only fork** — default terminology, seed data, and demos target subdivisions and condominiums. See [Sandiwa-OS.txt](Sandiwa-OS.txt) for the full product specification.
+
+## Local development
+
+### Prerequisites
+
+- Node.js 20+
+- pnpm 9+
+
+### Install and run
+
+```bash
+pnpm install
+pnpm dev
+```
+
+### Hostnames
+
+Modern browsers resolve `*.localhost` to `127.0.0.1`. Use these URLs:
+
+| URL | Context |
+|-----|---------|
+| http://sandiwa.localhost:3000 | Platform admin (org directory, feature toggles) |
+| http://greenfield-hoa.sandiwa.localhost:3000 | Demo HOA — Impact member portal |
+| http://sunrise-condo.sandiwa.localhost:3000 | Second demo HOA — different plugin mix |
+
+### Demo accounts
+
+**Platform admin** (main domain only):
+
+- Email: `admin@sandiwa.local`
+- Password: `demo1234`
+
+**Greenfield HOA staff** (`greenfield-hoa.sandiwa.localhost`):
+
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@greenfield-hoa.local` | `demo1234` | HOA Administrator |
+| `manager@greenfield-hoa.local` | `demo1234` | Manager |
+| `chair@greenfield-hoa.local` | `demo1234` | Committee Chair |
+
+### Reset seed data
+
+```bash
+pnpm seed:reset
+```
+
+Clears localStorage-backed demo data on next page load (or use the dev reset control in the platform UI).
+
+## Architecture
+
+- **Impact** — high-contrast member portal (public, org subdomain)
+- **Operations Console** — dark SaaS dashboard (authenticated HOA staff)
+- **Platform** — org onboarding and feature toggles (main domain only)
+
+Tenant resolution is client-side via hostname. Auth and data are mock/localStorage for the POC; production target is Supabase with RLS.
+
+## Agent workflow
+
+Multi-agent development uses Cursor subagents documented in [agent_personas.md](agent_personas.md). Kick off features with [prompt_to_start.txt](prompt_to_start.txt).
+
+Design and security handoffs: [docs/design-handoff.md](docs/design-handoff.md), [docs/security-handoff.md](docs/security-handoff.md).
+
+## Smoke test checklist
+
+1. `pnpm dev` starts without errors
+2. `sandiwa.localhost:3000` → platform login and org list
+3. `greenfield-hoa.sandiwa.localhost:3000` → Impact landing
+4. Staff login → Operations Console with intake module (when enabled)
+5. Unknown subdomain → not-found, no tenant data leak
