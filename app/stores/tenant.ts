@@ -30,7 +30,9 @@ export const useTenantStore = defineStore('tenant', {
 
   actions: {
     initialize() {
-      const resolution = resolveTenantFromHostname()
+      const config = useRuntimeConfig()
+      const platformDomain = (config.public.platformDomain as string) || undefined
+      const resolution = resolveTenantFromHostname(undefined, platformDomain)
       this.context = resolution.context
       this.slug = resolution.slug
       this.hostname = resolution.hostname

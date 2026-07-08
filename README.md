@@ -30,6 +30,25 @@ Modern browsers resolve `*.localhost` to `127.0.0.1`. Use these URLs:
 | http://greenfield-hoa.sandiwa.localhost:3000 | Demo HOA — Impact member portal |
 | http://sunrise-condo.sandiwa.localhost:3000 | Second demo HOA — different plugin mix |
 
+Tenant URLs are built from `NUXT_PUBLIC_PLATFORM_DOMAIN` (default `sandiwa.localhost`). Each org slug becomes `{slug}.{platformDomain}`.
+
+### Vercel deployment
+
+Set the platform domain in your Vercel project:
+
+```bash
+NUXT_PUBLIC_PLATFORM_DOMAIN=sandiwa-os.vercel.app
+```
+
+| URL | Context |
+|-----|---------|
+| https://sandiwa-os.vercel.app | Platform admin |
+| https://greenfield-hoa.sandiwa-os.vercel.app | Demo HOA tenant |
+
+**Per-tenant setup:** After registering an org in the app, add its subdomain in Vercel → Settings → Domains (e.g. `greenfield-hoa.sandiwa-os.vercel.app`) and assign it to your production branch. Vercel provisions SSL automatically — no DNS records needed for `*.vercel.app` subdomains added in the dashboard.
+
+For a future custom domain, set `NUXT_PUBLIC_PLATFORM_DOMAIN=sandiwa.os` and add `{slug}.sandiwa.os` per tenant the same way.
+
 ### Demo accounts
 
 **Platform admin** (main domain only):

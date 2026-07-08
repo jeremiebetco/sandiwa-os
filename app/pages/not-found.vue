@@ -1,5 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'impact' })
+
+const { buildPlatformUrl } = useTenantDomain()
 </script>
 
 <template>
@@ -10,7 +12,7 @@ definePageMeta({ layout: 'impact' })
     <p class="mt-2 shell-text-muted">
       This HOA subdomain is not registered on Sandiwa OS.
     </p>
-    <a href="http://sandiwa.localhost:3000" class="mt-6 inline-block text-[var(--bg-accent)] hover:underline">
+    <a :href="buildPlatformUrl()" class="mt-6 inline-block text-[var(--bg-accent)] hover:underline">
       Go to platform
     </a>
   </div>
