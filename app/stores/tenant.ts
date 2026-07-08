@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Organization, TenantContext } from '~/core/types'
-import { parseTenantRoutingConfig, resolveTenantRoutingMode } from '~/core/tenant/domain'
+import { parseTenantRoutingConfig } from '~/core/tenant/domain'
 import { resolveTenantFromHostname } from '~/core/tenant/resolver'
 import { loadDatabase } from '~/core/seed/service'
 

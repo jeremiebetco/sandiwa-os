@@ -10,8 +10,8 @@ Multi-tenant homeowners association (HOA) operations platform for the Philippine
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm 9+
+- Node.js **24.18.0** (see `.nvmrc` — run `nvm use` in the repo root)
+- pnpm 11.9.0 (see `packageManager` in `package.json`)
 
 ### Install and run
 

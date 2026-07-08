@@ -4,7 +4,6 @@ import {
   extractTenantSlug,
   extractTenantSlugFromPath,
   getEffectivePlatformDomain,
-  parseTenantRoutingConfig,
   resolveTenantRoutingMode,
   isPlatformHost,
   type TenantRoutingConfig,

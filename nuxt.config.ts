@@ -41,6 +41,15 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2026-06-30',
 
+  vite: {
+    server: {
+      allowedHosts: [
+        'sandiwa.localhost',
+        '.sandiwa.localhost'
+      ]
+    }
+  },
+
   hooks: {
     'pages:extend'(pages) {
       const tenantPages = pages
@@ -55,15 +64,6 @@ export default defineNuxtConfig({
         }))
 
       pages.push(...tenantPages)
-    }
-  },
-
-  vite: {
-    server: {
-      allowedHosts: [
-        'sandiwa.localhost',
-        '.sandiwa.localhost'
-      ]
     }
   },
 
