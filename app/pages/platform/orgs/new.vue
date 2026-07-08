@@ -4,6 +4,7 @@ import type { FeatureFlags, PlanTier } from '~/core/types'
 definePageMeta({ layout: 'platform' })
 
 const platform = usePlatformStore()
+const { formatTenantHost } = useTenantDomain()
 
 const form = reactive({
   name: '',
@@ -73,7 +74,7 @@ function create() {
       <UFormField label="Subdomain slug" required>
         <UInput v-model="form.slug" class="w-full" />
         <p class="mt-1 text-xs shell-text-muted">
-          {{ form.slug || 'slug' }}.sandiwa.localhost
+          {{ formatTenantHost(form.slug || 'slug') }}
         </p>
       </UFormField>
       <UFormField label="Address">

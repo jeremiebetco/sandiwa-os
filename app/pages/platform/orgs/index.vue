@@ -6,14 +6,7 @@ const platform = usePlatformStore()
 onMounted(() => platform.hydrate())
 
 const orgs = computed(() => platform.organizations)
-
-function tenantUrl(slug: string): string {
-  if (import.meta.client) {
-    const port = window.location.port ? `:${window.location.port}` : ''
-    return `${window.location.protocol}//${slug}.sandiwa.localhost${port}/`
-  }
-  return `http://${slug}.sandiwa.localhost:3000/`
-}
+const { buildTenantUrl, formatTenantHost } = useTenantDomain()
 
 function resetDemo() {
   platform.resetDemoData()
@@ -55,11 +48,11 @@ function resetDemo() {
             </h3>
             <p class="text-sm shell-text-muted">
               <a
-                :href="tenantUrl(org.slug)"
+                :href="buildTenantUrl(org.slug)"
                 class="text-[var(--bg-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--bg-accent)] focus-visible:ring-offset-2"
                 target="_blank"
                 rel="noopener noreferrer"
-              >{{ org.slug }}.sandiwa.localhost</a>
+              >{{ formatTenantHost(org.slug) }}</a>
               · {{ org.planTier }} · {{ org.status }}
             </p>
             <p class="mt-1 text-sm">

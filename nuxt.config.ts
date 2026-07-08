@@ -32,6 +32,12 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  runtimeConfig: {
+    public: {
+      platformDomain: process.env.NUXT_PUBLIC_PLATFORM_DOMAIN || 'sandiwa.localhost'
+    }
+  },
+
   compatibilityDate: '2026-06-30',
 
   vite: {

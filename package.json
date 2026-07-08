@@ -9,6 +9,7 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
+    "test": "vitest run",
     "seed:reset": "node scripts/seed-reset.mjs"
   },
   "dependencies": {
@@ -23,8 +24,10 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
+    "@types/node": "^26.1.0",
     "eslint": "^10.6.0",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.10",
     "vue-tsc": "^3.3.5"
   },
   "packageManager": "pnpm@11.9.0",
