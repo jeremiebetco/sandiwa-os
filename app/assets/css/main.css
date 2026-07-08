@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+@import "./tokens.css";
+
+@theme static {
+  --font-sans: var(--font-sans);
+}

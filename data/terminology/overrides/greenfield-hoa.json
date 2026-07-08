@@ -1,0 +1,12 @@
+{
+  "modules": {
+    "intake": {
+      "label": "HOA Request",
+      "description": "File a maintenance or community concern",
+      "navLabel": "HOA Requests"
+    }
+  },
+  "fields": {
+    "unit": { "label": "Block & Lot" }
+  }
+}

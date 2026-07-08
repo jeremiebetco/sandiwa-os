@@ -4,6 +4,15 @@
           High-Level Client-Facing Feature Detailed Pitch Document
 ================================================================================
 
+>>> HOA PRODUCT FORK NOTE (this repository)
+This branch/product is HOA-only. Default terminology, seed data, and onboarding
+copy target homeowners associations (subdivisions, condominiums). Cooperative
+and generic-association examples (e.g. bayanihan-coop) are deprecated in this
+fork. The platform engine remains multi-tenant — multiple HOA orgs share one
+codebase with per-org feature toggles and optional terminology overrides.
+<<<
+
+
 1. EXECUTIVE SUMMARY & VALUE PROPOSITION
 --------------------------------------------------------------------------------
 Across the Philippines, member-based communities—homeowners associations, 
