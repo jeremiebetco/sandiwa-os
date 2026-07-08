@@ -1,5 +1,6 @@
 import { useAuthStore } from '~/stores/auth'
 import { useTenantStore } from '~/stores/tenant'
+import { stripTenantPathPrefix, tenantPath } from '~/core/tenant/domain'
 
 const PLATFORM_PUBLIC = ['/platform/login']
 const ORG_PUBLIC = ['/', '/announcements', '/login', '/portal/requests', '/not-found']
@@ -12,6 +13,13 @@ export default defineNuxtRouteMiddleware((to) => {
   const tenant = useTenantStore()
 
   auth.validateSessionForContext()
+
+  const { innerPath } = stripTenantPathPrefix(to.path)
+  const orgPath = tenant.isOrganization ? innerPath : to.path
+
+  function orgTo(path: string) {
+    return tenantPath(path, tenant.slug, tenant.routingMode)
+  }
 
   if (tenant.isPlatform) {
     const isPublic = PLATFORM_PUBLIC.includes(to.path) || to.path === '/'
@@ -28,22 +36,22 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   if (tenant.isOrganization) {
-    const isPublic = ORG_PUBLIC.some(p => to.path === p || to.path.startsWith(p + '/'))
-    const isConsole = to.path.startsWith('/console')
+    const isPublic = ORG_PUBLIC.some(p => orgPath === p || orgPath.startsWith(p + '/'))
+    const isConsole = orgPath.startsWith('/console')
 
     if (isConsole && !auth.isOrgStaff) {
-      return navigateTo('/login')
+      return navigateTo(orgTo('/login'))
     }
 
     if (!isPublic && !isConsole && !auth.isAuthenticated) {
-      return navigateTo('/login')
+      return navigateTo(orgTo('/login'))
     }
 
-    if (to.path === '/login' && auth.isOrgStaff) {
-      return navigateTo('/console')
+    if (orgPath === '/login' && auth.isOrgStaff) {
+      return navigateTo(orgTo('/console'))
     }
 
-    if (ORG_MEMBER_ROUTES.some(r => to.path.startsWith(r)) && auth.isOrgStaff && !to.path.startsWith('/console')) {
+    if (ORG_MEMBER_ROUTES.some(r => orgPath.startsWith(r)) && auth.isOrgStaff && !orgPath.startsWith('/console')) {
       // staff can still view portal but console is primary
     }
   }

@@ -34,7 +34,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      platformDomain: process.env.NUXT_PUBLIC_PLATFORM_DOMAIN || 'sandiwa.localhost'
+      platformDomain: process.env.NUXT_PUBLIC_PLATFORM_DOMAIN || 'sandiwa.localhost',
+      tenantRouting: process.env.NUXT_PUBLIC_TENANT_ROUTING || 'auto'
     }
   },
 
@@ -46,6 +47,23 @@ export default defineNuxtConfig({
         'sandiwa.localhost',
         '.sandiwa.localhost'
       ]
+    }
+  },
+
+  hooks: {
+    'pages:extend'(pages) {
+      const tenantPages = pages
+        .filter((page) => {
+          const path = page.path ?? ''
+          return !path.startsWith('/platform') && !path.startsWith('/o/')
+        })
+        .map(page => ({
+          ...page,
+          path: `/o/:tenantSlug${page.path === '/' ? '' : page.path}`,
+          name: page.name ? `tenant-${String(page.name)}` : undefined
+        }))
+
+      pages.push(...tenantPages)
     }
   },
 

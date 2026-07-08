@@ -6,30 +6,31 @@ const { logout, user } = useAuth()
 const { t } = useTerminology()
 const { isEnabled } = useFeatures()
 const route = useRoute()
+const { to: tenantPath } = useTenantPath()
 
 const navItems = computed(() => {
   const items: { label: string, to: string, icon: string, plugin?: PluginKey }[] = [
-    { label: 'Dashboard', to: '/console', icon: 'i-lucide-layout-dashboard' }
+    { label: 'Dashboard', to: tenantPath('/console'), icon: 'i-lucide-layout-dashboard' }
   ]
 
   if (isEnabled('announcements')) {
-    items.push({ label: 'Announcements', to: '/console/announcements', icon: 'i-lucide-megaphone', plugin: 'announcements' })
+    items.push({ label: 'Announcements', to: tenantPath('/console/announcements'), icon: 'i-lucide-megaphone', plugin: 'announcements' })
   }
   if (isEnabled('intake')) {
-    items.push({ label: t('modules.intake.navLabel'), to: '/console/modules/intake', icon: 'i-lucide-inbox', plugin: 'intake' })
+    items.push({ label: t('modules.intake.navLabel'), to: tenantPath('/console/modules/intake'), icon: 'i-lucide-inbox', plugin: 'intake' })
   }
   if (isEnabled('staff_management')) {
-    items.push({ label: 'Staff', to: '/console/staff', icon: 'i-lucide-users', plugin: 'staff_management' })
+    items.push({ label: 'Staff', to: tenantPath('/console/staff'), icon: 'i-lucide-users', plugin: 'staff_management' })
   }
   if (isEnabled('landing_editor')) {
-    items.push({ label: 'Landing', to: '/console/landing', icon: 'i-lucide-palette', plugin: 'landing_editor' })
+    items.push({ label: 'Landing', to: tenantPath('/console/landing'), icon: 'i-lucide-palette', plugin: 'landing_editor' })
   }
 
   for (const plugin of ['payments', 'ledger', 'polls', 'broadcasts'] as PluginKey[]) {
     if (isEnabled(plugin)) {
       items.push({
         label: t(`modules.${plugin}.navLabel`),
-        to: `/console/modules/${plugin}`,
+        to: tenantPath(`/console/modules/${plugin}`),
         icon: 'i-lucide-puzzle',
         plugin
       })
@@ -40,7 +41,8 @@ const navItems = computed(() => {
 })
 
 function isActive(path: string) {
-  return route.path === path || (path !== '/console' && route.path.startsWith(path))
+  const full = tenantPath(path)
+  return route.path === full || (path !== '/console' && route.path.startsWith(full))
 }
 </script>
 
@@ -80,10 +82,10 @@ function isActive(path: string) {
           {{ user?.email }}
         </p>
         <div class="mt-3 flex gap-2">
-          <NuxtLink to="/" class="text-xs text-[var(--bg-accent)] hover:underline">
+          <NuxtLink :to="tenantPath('/')" class="text-xs text-[var(--bg-accent)] hover:underline">
             View portal
           </NuxtLink>
-          <button type="button" class="text-xs shell-text-muted hover:underline" @click="logout(); navigateTo('/login')">
+          <button type="button" class="text-xs shell-text-muted hover:underline" @click="logout(); navigateTo(tenantPath('/login'))">
             Sign out
           </button>
         </div>
@@ -95,7 +97,7 @@ function isActive(path: string) {
           {{ organization?.name }}
         </h2>
         <div class="ml-auto flex gap-2 md:hidden">
-          <UButton size="sm" variant="ghost" @click="logout(); navigateTo('/login')">
+          <UButton size="sm" variant="ghost" @click="logout(); navigateTo(tenantPath('/login'))">
             Sign out
           </UButton>
         </div>

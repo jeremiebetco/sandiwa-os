@@ -1,12 +1,13 @@
 <script setup lang="ts">
 const { isPlatform, isOrganization, organization, unknownOrg } = useTenant()
+const { to: tenantPath } = useTenantPath()
 
 onMounted(() => {
   if (isPlatform.value) {
     navigateTo('/platform/login')
   }
   if (unknownOrg.value) {
-    navigateTo('/not-found')
+    navigateTo(tenantPath('/not-found'))
   }
 })
 
@@ -41,7 +42,7 @@ const announcements = computed(() => {
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <NuxtLink
           v-if="isEnabled('intake')"
-          to="/portal/requests"
+          :to="tenantPath('/portal/requests')"
           class="impact-action-panel impact-action-panel--services"
         >
           <UIcon name="i-lucide-message-square-plus" class="size-10" />
@@ -72,7 +73,7 @@ const announcements = computed(() => {
         <h3 class="text-xl font-semibold">
           Announcements
         </h3>
-        <NuxtLink to="/announcements" class="text-sm text-[var(--bg-accent)] hover:underline">
+        <NuxtLink :to="tenantPath('/announcements')" class="text-sm text-[var(--bg-accent)] hover:underline">
           View all
         </NuxtLink>
       </div>

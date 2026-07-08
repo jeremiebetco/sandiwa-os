@@ -2,12 +2,13 @@
 definePageMeta({ layout: 'impact' })
 
 const { loginOrg, isLoading, error } = useAuth()
+const { to: tenantPath } = useTenantPath()
 const email = ref('admin@greenfield-hoa.local')
 const password = ref('demo1234')
 
 async function onSubmit() {
   const ok = await loginOrg(email.value, password.value)
-  if (ok) await navigateTo('/console')
+  if (ok) await navigateTo(tenantPath('/console'))
 }
 </script>
 
@@ -49,7 +50,7 @@ async function onSubmit() {
         <UButton type="submit" block :loading="isLoading">
           Sign in to console
         </UButton>
-        <NuxtLink to="/" class="block text-center text-sm shell-text-muted hover:underline">
+        <NuxtLink :to="tenantPath('/')" class="block text-center text-sm shell-text-muted hover:underline">
           Back to member portal
         </NuxtLink>
       </form>

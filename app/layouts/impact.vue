@@ -2,6 +2,7 @@
 const { organization } = useTenant()
 const { isOrgStaff } = useAuth()
 const { t } = useTerminology()
+const { to: tenantPath } = useTenantPath()
 
 const language = useState('impact-language', () => 'en')
 
@@ -33,14 +34,14 @@ function toggleLanguage() {
           </button>
           <NuxtLink
             v-if="!isOrgStaff"
-            to="/login"
+            :to="tenantPath('/login')"
             class="interactive-states rounded-full bg-white/20 px-4 py-2 text-sm font-semibold"
           >
             Staff Login
           </NuxtLink>
           <NuxtLink
             v-else
-            to="/console"
+            :to="tenantPath('/console')"
             class="interactive-states rounded-full bg-white/20 px-4 py-2 text-sm font-semibold"
           >
             {{ t('roles.staff.label', 'Staff') }} Console

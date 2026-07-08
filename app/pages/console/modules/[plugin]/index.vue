@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { t } = useTerminology()
 const route = useRoute()
+const { to: tenantPath } = useTenantPath()
 const plugin = computed(() => route.params.plugin as string)
 
 definePageMeta({ layout: 'console' })
@@ -14,7 +15,7 @@ definePageMeta({ layout: 'console' })
     <p class="mt-2 shell-text-muted">
       Module stub — full implementation deferred. Feature gating and routing are active.
     </p>
-    <UButton class="mt-6" to="/console">
+    <UButton class="mt-6" :to="tenantPath('/console')">
       Back to dashboard
     </UButton>
   </div>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'console' })
+
+const { to: tenantPath } = useTenantPath()
 </script>
 
 <template>
@@ -11,7 +13,7 @@ definePageMeta({ layout: 'console' })
     <p class="mt-2 shell-text-muted">
       This feature is not enabled for your HOA. Contact the platform administrator.
     </p>
-    <UButton class="mt-6" to="/console">
+    <UButton class="mt-6" :to="tenantPath('/console')">
       Back to dashboard
     </UButton>
   </div>

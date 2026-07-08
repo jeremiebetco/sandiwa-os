@@ -6,6 +6,7 @@ definePageMeta({ layout: 'impact' })
 
 const { organization } = useTenant()
 const { t } = useTerminology()
+const { to: tenantPath } = useTenantPath()
 const platform = usePlatformStore()
 
 const description = ref('')
@@ -57,7 +58,7 @@ function submit() {
 <template>
   <div class="mx-auto max-w-2xl space-y-8">
     <div>
-      <NuxtLink to="/" class="text-sm text-[var(--bg-accent)] hover:underline">
+      <NuxtLink :to="tenantPath('/')" class="text-sm text-[var(--bg-accent)] hover:underline">
         ← Back home
       </NuxtLink>
       <h2 class="mt-4 text-2xl font-bold">
