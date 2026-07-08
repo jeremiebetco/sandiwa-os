@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { organization } = useTenant()
-const { logout, isOrgStaff } = useAuth()
+const { isOrgStaff } = useAuth()
 const { t } = useTerminology()
 
 const language = useState('impact-language', () => 'en')

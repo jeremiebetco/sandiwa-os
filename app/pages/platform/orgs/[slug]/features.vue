@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FeatureFlags, PlanTier } from '~/core/types'
+import type { FeatureFlags } from '~/core/types'
 import { PLUGIN_KEYS } from '~/core/types'
 
 definePageMeta({ layout: 'platform' })

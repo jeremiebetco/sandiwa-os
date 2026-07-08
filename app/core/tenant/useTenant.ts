@@ -1,4 +1,3 @@
-import type { PluginKey } from '~/core/types'
 import { useTenantStore } from '~/stores/tenant'
 
 export function useTenant() {

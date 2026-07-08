@@ -4,15 +4,15 @@ export type OrgRole = 'org_admin' | 'manager' | 'committee_lead' | 'staff' | 'me
 
 export type PlatformRole = 'platform_admin'
 
-export type PluginKey =
-  | 'intake'
-  | 'payments'
-  | 'ledger'
-  | 'polls'
-  | 'broadcasts'
-  | 'landing_editor'
-  | 'staff_management'
-  | 'announcements'
+export type PluginKey
+  = | 'intake'
+    | 'payments'
+    | 'ledger'
+    | 'polls'
+    | 'broadcasts'
+    | 'landing_editor'
+    | 'staff_management'
+    | 'announcements'
 
 export type PlanTier = 'basic' | 'standard' | 'premium'
 

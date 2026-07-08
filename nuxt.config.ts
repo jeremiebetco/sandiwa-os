@@ -9,11 +9,17 @@ export default defineNuxtConfig({
 
   ssr: false,
 
+  imports: {
+    dirs: [
+      'core/tenant',
+      'core/auth',
+      'core/terminology'
+    ]
+  },
+
   devtools: {
     enabled: true
   },
-
-  css: ['~/assets/css/main.css'],
 
   app: {
     head: {
@@ -24,6 +30,10 @@ export default defineNuxtConfig({
     }
   },
 
+  css: ['~/assets/css/main.css'],
+
+  compatibilityDate: '2026-06-30',
+
   vite: {
     server: {
       allowedHosts: [
@@ -31,16 +41,6 @@ export default defineNuxtConfig({
         '.sandiwa.localhost'
       ]
     }
-  },
-
-  compatibilityDate: '2026-06-30',
-
-  imports: {
-    dirs: [
-      'core/tenant',
-      'core/auth',
-      'core/terminology'
-    ]
   },
 
   eslint: {
