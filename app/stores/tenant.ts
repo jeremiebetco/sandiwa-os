@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Organization, TenantContext } from '~/core/types'
+import { parseTenantRoutingConfig, resolveTenantRoutingMode } from '~/core/tenant/domain'
 import { resolveTenantFromHostname } from '~/core/tenant/resolver'
 import { loadDatabase } from '~/core/seed/service'
 
@@ -8,6 +9,7 @@ interface TenantState {
   context: TenantContext
   slug: string | null
   hostname: string
+  routingMode: TenantRoutingMode
   organization: Organization | null
   unknownOrg: boolean
 }
@@ -18,6 +20,7 @@ export const useTenantStore = defineStore('tenant', {
     context: 'platform',
     slug: null,
     hostname: '',
+    routingMode: 'subdomain',
     organization: null,
     unknownOrg: false
   }),
@@ -31,11 +34,19 @@ export const useTenantStore = defineStore('tenant', {
   actions: {
     initialize() {
       const config = useRuntimeConfig()
-      const platformDomain = (config.public.platformDomain as string) || undefined
-      const resolution = resolveTenantFromHostname(undefined, platformDomain)
+      const configuredDomain = (config.public.platformDomain as string) || undefined
+      const routingConfig = parseTenantRoutingConfig(config.public.tenantRouting as string | undefined)
+      const resolution = resolveTenantFromHostname(
+        undefined,
+        configuredDomain,
+        import.meta.client ? window.location.pathname : undefined,
+        routingConfig
+      )
+
       this.context = resolution.context
       this.slug = resolution.slug
       this.hostname = resolution.hostname
+      this.routingMode = resolution.routingMode
       this.unknownOrg = false
       this.organization = null
 

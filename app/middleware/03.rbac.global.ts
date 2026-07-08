@@ -2,6 +2,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useTenantStore } from '~/stores/tenant'
 import { useFeatures } from '~/core/tenant/useFeatures'
 import { canAccessModule } from '~/core/rbac/permissions'
+import { stripTenantPathPrefix, tenantPath } from '~/core/tenant/domain'
 import type { OrgRole, PluginKey } from '~/core/types'
 
 const MODULE_ROUTE_MAP: Record<string, PluginKey> = {
@@ -23,8 +24,15 @@ export default defineNuxtRouteMiddleware((to) => {
   const tenant = useTenantStore()
   const { isEnabled } = useFeatures()
 
+  const { innerPath } = stripTenantPathPrefix(to.path)
+  const orgPath = tenant.isOrganization ? innerPath : to.path
+
+  function orgTo(path: string) {
+    return tenantPath(path, tenant.slug, tenant.routingMode)
+  }
+
   const matchedEntry = Object.entries(MODULE_ROUTE_MAP).find(([prefix]) =>
-    to.path === prefix || to.path.startsWith(prefix + '/')
+    orgPath === prefix || orgPath.startsWith(prefix + '/')
   )
 
   if (!matchedEntry) return
@@ -32,22 +40,22 @@ export default defineNuxtRouteMiddleware((to) => {
   const [routePrefix, plugin] = matchedEntry
 
   if (!isEnabled(plugin)) {
-    if (to.path.startsWith('/console')) {
-      return navigateTo('/console/module-disabled')
+    if (orgPath.startsWith('/console')) {
+      return navigateTo(orgTo('/console/module-disabled'))
     }
-    return navigateTo('/')
+    return navigateTo(orgTo('/'))
   }
 
-  if (tenant.isOrganization && to.path.startsWith('/console')) {
+  if (tenant.isOrganization && orgPath.startsWith('/console')) {
     if (!auth.isOrgStaff || !auth.user) {
-      return navigateTo('/login')
+      return navigateTo(orgTo('/login'))
     }
     if (!canAccessModule(auth.user.role as OrgRole, plugin)) {
-      return navigateTo('/console')
+      return navigateTo(orgTo('/console'))
     }
   }
 
-  if (to.path.startsWith(routePrefix) && tenant.isOrganization && to.path.startsWith('/portal')) {
+  if (orgPath.startsWith(routePrefix) && tenant.isOrganization && orgPath.startsWith('/portal')) {
     // portal intake accessible to members when enabled — no staff role required
   }
 })

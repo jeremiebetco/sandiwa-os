@@ -1,8 +1,9 @@
 import { useTenantStore } from '~/stores/tenant'
 import { useAuthStore } from '~/stores/auth'
 import { usePlatformStore } from '~/stores/platform'
+import { stripTenantPathPrefix, tenantPath } from '~/core/tenant/domain'
 
-export default defineNuxtRouteMiddleware(() => {
+export default defineNuxtRouteMiddleware((to) => {
   if (!import.meta.client) return
 
   const tenant = useTenantStore()
@@ -14,6 +15,9 @@ export default defineNuxtRouteMiddleware(() => {
   auth.validateSessionForContext()
 
   if (tenant.isOrganization && tenant.unknownOrg) {
-    return navigateTo('/not-found')
+    const { innerPath } = stripTenantPathPrefix(to.path)
+    if (innerPath !== '/not-found') {
+      return navigateTo(tenantPath('/not-found', tenant.slug, tenant.routingMode))
+    }
   }
 })

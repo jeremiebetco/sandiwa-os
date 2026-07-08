@@ -30,24 +30,32 @@ Modern browsers resolve `*.localhost` to `127.0.0.1`. Use these URLs:
 | http://greenfield-hoa.sandiwa.localhost:3000 | Demo HOA — Impact member portal |
 | http://sunrise-condo.sandiwa.localhost:3000 | Second demo HOA — different plugin mix |
 
-Tenant URLs are built from `NUXT_PUBLIC_PLATFORM_DOMAIN` (default `sandiwa.localhost`). Each org slug becomes `{slug}.{platformDomain}`.
+Tenant URLs are built from `NUXT_PUBLIC_PLATFORM_DOMAIN` (default `sandiwa.localhost`) and `NUXT_PUBLIC_TENANT_ROUTING` (default `auto`).
+
+| `NUXT_PUBLIC_TENANT_ROUTING` | Behavior |
+|------------------------------|----------|
+| `auto` (default) | Subdomain locally / on custom domains; path on `*.vercel.app` |
+| `subdomain` | Always `{slug}.{platformDomain}` |
+| `path` | Always `{platformDomain}/o/{slug}` |
 
 ### Vercel deployment
 
-Set the platform domain in your Vercel project:
-
-```bash
-NUXT_PUBLIC_PLATFORM_DOMAIN=sandiwa-os.vercel.app
-```
+Vercel does **not** allow subdomains on `*.vercel.app` (e.g. `greenfield-hoa.sandiwa-os.vercel.app` cannot be added in Domains). The app auto-detects this and uses **path-based tenant URLs** instead:
 
 | URL | Context |
 |-----|---------|
 | https://sandiwa-os.vercel.app | Platform admin |
-| https://greenfield-hoa.sandiwa-os.vercel.app | Demo HOA tenant |
+| https://sandiwa-os.vercel.app/o/greenfield-hoa | Demo HOA tenant |
+| https://sandiwa-os.vercel.app/o/sunrise-condo | Second demo HOA |
 
-**Per-tenant setup:** After registering an org in the app, add its subdomain in Vercel → Settings → Domains (e.g. `greenfield-hoa.sandiwa-os.vercel.app`) and assign it to your production branch. Vercel provisions SSL automatically — no DNS records needed for `*.vercel.app` subdomains added in the dashboard.
+Optional env vars (auto-detected on `.vercel.app` if omitted):
 
-For a future custom domain, set `NUXT_PUBLIC_PLATFORM_DOMAIN=sandiwa.os` and add `{slug}.sandiwa.os` per tenant the same way.
+```bash
+NUXT_PUBLIC_PLATFORM_DOMAIN=sandiwa-os.vercel.app
+NUXT_PUBLIC_TENANT_ROUTING=auto
+```
+
+When you add a **custom domain** later (e.g. `sandiwa.os`), set `NUXT_PUBLIC_PLATFORM_DOMAIN=sandiwa.os` and add per-tenant subdomains via DNS — the app will switch back to subdomain routing automatically.
 
 ### Demo accounts
 
