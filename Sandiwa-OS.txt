@@ -1,0 +1,542 @@
+================================================================================
+         SANDIWA OS: THE INTELLIGENT COMMUNITY OPERATIONS PLATFORM
+     Multi-Tenant Platform for HOAs, Cooperatives & Member-Based Organizations
+          High-Level Client-Facing Feature Detailed Pitch Document
+================================================================================
+
+1. EXECUTIVE SUMMARY & VALUE PROPOSITION
+--------------------------------------------------------------------------------
+Across the Philippines, member-based communities—homeowners associations, 
+cooperatives, parish councils, and neighborhood associations—still run on paper 
+logs, Viber group chats, and spreadsheets. Sandiwa OS (derived from "Isang Diwa" 
+or "One Spirit") bridges the digital divide by transforming these operations into 
+a smart, accessible, and transparent digital ecosystem.
+
+Sandiwa OS is a single platform engine that serves many organizations. Each tenant 
+enables only the feature plugins it needs, receives its own branded subdomain, and 
+shares a generic default terminology set—customizable per org via JSON overrides. 
+By unifying member-facing simplicity with enterprise-grade operational tools, 
+Sandiwa OS eliminates administrative friction, addresses low technical literacy, 
+and introduces localized artificial intelligence to everyday community management. 
+This platform converts routine member actions—from filing requests to settling 
+dues to voting on projects—into structured, actionable, and secure digital 
+workflows.
+
+Sandiwa OS is the operating system for Filipino communities of accountability: 
+any group with members, officers, money, complaints, votes, and emergencies.
+
+
+2. PLATFORM VISION & TARGET VERTICALS
+--------------------------------------------------------------------------------
+Sandiwa OS targets private, member-based organizations—not government resident 
+registry systems. The platform sells to organizations that collect dues, elect 
+officers, and coordinate daily operations without a standardized digital backbone.
+
+* HOA / Subdivision / Condominium
+  Buyer: HOA board, property manager, or property developer offering "smart 
+  community" as an amenity.
+
+* Cooperative
+  Buyer: cooperative board or federation channel (e.g. multi-purpose, credit, or 
+  transport cooperatives).
+
+* Generic Association
+  Buyer: parish councils, NGOs, alumni associations, disaster response networks, 
+  or any member organization needing a lightweight digital hub.
+
+  All verticals use the same platform engine, generic default labels, and 
+  plugin/feature configuration set by the platform admin per organization—not 
+  by industry-specific presets.
+
+* Competitive Positioning
+  Sandiwa OS does not compete on government resident registry or LGU compliance 
+  records. It wins on member engagement, accessibility, AI-powered intake, 
+  GCash/Maya-native payments, verified participation, and fast tenant onboarding—
+  capabilities that fragmented community tools and generic spreadsheets cannot match.
+
+
+3. CORE ARCHITECTURE: DUAL UI
+--------------------------------------------------------------------------------
+The system manages two distinct interfaces under a unified database architecture, 
+adapting gracefully to the user's technical proficiency and professional context.
+
+A. Member Portal: "Impact" & Computer-Illiterate-Friendly
+   The public-facing portal is designed specifically for members who may struggle 
+   with modern software interfaces. It uses a high-contrast layout paired with 
+   large, highly descriptive, icon-driven panels rather than deeply nested text 
+   menus. A prominent, one-tap language toggle switches the entire site between 
+   English, Tagalog, or specific regional dialects. To assist users with limited 
+   reading literacy or visual impairments, the portal includes an integrated 
+   text-to-speech engine that can read out org announcements, ongoing fund 
+   distributions, or localized updates in a natural, local accent. Action buttons 
+   are strictly color-coded—such as Green for Services, Blue for Payments and 
+   Documents, and Red for Emergencies—minimizing user error. Enabled plugin tiles 
+   appear only when the platform admin has toggled them on for that organization.
+
+B. Operations Console: Modern SaaS Dashboard (Default Theme)
+   The administrative workspace for org admins, managers, and staff functions as 
+   a clean, high-performance dashboard. The default visual theme uses a dark 
+   blue-gray palette with white text for primary copy, labels, and navigation—
+   delivering a focused, low-glare environment suited to long operational 
+   sessions. Large surface areas (page headers, section backgrounds, empty states) 
+   use subtle gradient backgrounds to add depth without competing with data 
+   density. The layout strips away chaotic UI clutter in favor of a modern SaaS 
+   structure. Data visualizations track pending intake cases, monitor community 
+   metrics, display real-time polling analytics, and audit the community fund 
+   ledger, instilling operational clarity and transparency.
+
+   Theming is pluggable: the default dark blue-gray theme ships out of the box, 
+   but organizations (or the platform layer) may swap in alternate theme packs 
+   later—adjusting palette tokens, gradient stops, and accent colors without 
+   changing application structure or module layout.
+
+
+4. FEATURE MODULES (CORE + PLUGINS)
+--------------------------------------------------------------------------------
+Sandiwa OS is built as a skeleton core with loadable feature plugins. All plugins 
+share the same neutral module keys, UI layout, and workflows; only display copy is 
+resolved at runtime from a terminology JSON file (with optional per-org overrides).
+
+* Core Modules (Always On — Skeleton MVP)
+  - Organization profile and branding (name, logo, accent colors, contact)
+  - Member portal landing page (configurable content blocks)
+  - Announcements and news feed
+  - Authentication (member and staff accounts)
+  - Staff and member directory (basic)
+  - Platform: organization onboarding, subscription plans, per-org feature toggles
+
+* Plugin: intake (AI-Driven Case Routing)
+  Instead of making members navigate confusing category dropdowns, the platform 
+  allows them to log requests or disputes using natural language, Taglish, or 
+  regional dialects. An embedded AI engine conducts real-time sentiment analysis, 
+  extracts key variables (e.g., location, urgency, category), and automatically 
+  triages the case to the assigned manager or committee lead. This cuts response 
+  times from days to hours and allows members to track cases via automated SMS 
+  or web dashboards.
+
+* Plugin: payments (Dues, Fees & Document Payments)
+  Integrates a frictionless payment gateway for org dues, parking fees, clearance 
+  requests, and membership fees via local channels like GCash and Maya. Supports 
+  payment request workflows with status tracking and receipt generation.
+
+* Plugin: ledger (Auditable Community Fund)
+  Keeps an automated, auditable record of community fund disbursements, emergency 
+  advances, or micro-loans distributed to members during crises. Uses automated, 
+  non-confrontational AI SMS reminders to manage repayments and track fund health.
+
+* Plugin: polls (Verified Participation)
+  Enables verified, profile-locked voting on community projects, budget 
+  allocations, and organizational resolutions. The system protects vote integrity 
+  through strict member verification. Once a poll closes, the AI generates an 
+  executive summary for org admins, highlighting community consensus, core 
+  objections, and major thematic feedback from comment sections.
+
+* Plugin: broadcasts (Localized Alerts)
+  During extreme weather, emergencies, or urgent ops updates, the platform 
+  transforms dense text-heavy warnings into bite-sized, regional-dialect audio 
+  notes and clear, high-contrast infographics, ensuring critical instructions 
+  reach every member immediately via SMS, portal, or push.
+
+* Terminology JSON (Label-Only)
+  Module keys remain neutral in code. UI copy is resolved at runtime via 
+  useTerminology from a shared terminology JSON file. Labels are intentionally 
+  generic and industry-neutral; industry-specific wording appears only when a 
+  developer adds a per-org override file.
+
+  File layout (documented, not implemented yet):
+
+  data/
+    terminology/
+      default.json          — shared generic labels for all orgs
+      overrides/
+        {orgSlug}.json      — optional per-org label overrides (edited in code)
+
+  default.json schema:
+
+  {
+    "version": "1",
+    "modules": {
+      "intake": {
+        "label": "Request",
+        "description": "Submit a request or concern",
+        "navLabel": "Requests"
+      },
+      "payments": {
+        "label": "Payments",
+        "description": "Pay fees and view payment history",
+        "navLabel": "Payments"
+      },
+      "ledger": {
+        "label": "Community Fund",
+        "description": "Track fund disbursements and repayments",
+        "navLabel": "Fund"
+      },
+      "polls": {
+        "label": "Vote",
+        "description": "Participate in organization polls",
+        "navLabel": "Votes"
+      },
+      "broadcasts": {
+        "label": "Alert",
+        "description": "Receive urgent organization alerts",
+        "navLabel": "Alerts"
+      }
+    },
+    "roles": {
+      "org_admin": { "label": "Administrator" },
+      "manager": { "label": "Manager" },
+      "committee_lead": { "label": "Committee Lead" },
+      "staff": { "label": "Staff" },
+      "member": { "label": "Member" }
+    },
+    "fields": {
+      "unit": { "label": "Unit" },
+      "member_no": { "label": "Member Number" },
+      "share_capital": { "label": "Share Balance" }
+    }
+  }
+
+  Resolution order for any label key: org override (if present) → default.json 
+  → neutral module key fallback (e.g. intake).
+
+  useTerminology composable contract:
+    - Input: dot-path key (e.g. modules.intake.label, roles.org_admin.label)
+    - Output: resolved string for the active org
+    - Used by: nav items, plugin tiles, page titles, form field labels, role 
+      display names
+    - Does not: gate routes, enable plugins, or change data models
+
+
+5. TECHNICAL STACK & TOOLING
+--------------------------------------------------------------------------------
+Built on a cutting-edge web architecture, Sandiwa OS is optimized to run smoothly 
+across the Philippines, where mobile devices dominate and internet connectivity 
+can fluctuate unpredictably.
+
+[ ARCHITECTURE DIAGRAM ]
+
+  +-----------------------------------------------------------------------+
+  |                           SANDIWA OS UI LAYER                         |
+  |   [Member Portal] (Impact)   |   [Operations Console] (Default Theme) |
+  +-----------------------------------------------------------------------+
+  |                            NUXT 4 ENGINE                              |
+  |   (App Router, Hybrid Rendering Engine, Native Type Safety, Nitro)    |
+  +-----------------------------------------------------------------------+
+  |                         MODULES & EXTERNALS                           |
+  |  [Nuxt UI v4]  [Nuxt Image v2]  [Supabase / RLS]  [AI SDK / LLM]     |
+  |  [PayMongo / Xendit — future]  [Semaphore / Twilio — future]          |
+  +-----------------------------------------------------------------------+
+
+* The Nuxt 4 Architecture
+  The application leverages the robust Nuxt 4 framework to deliver a hybrid 
+  architecture. The public member portal uses Server-Side Rendering (SSR) combined 
+  with Incremental Static Regeneration (ISR) to serve announcements instantly, 
+  ensuring the page functions even on spotty data connections. The operations 
+  console runs as a highly reactive Single Page Application (SPA). Nuxt 4's 
+  optimized app/ directory structure enforces strict code separation between 
+  universal logic, administrative tools, and server routes, while its native 
+  singleton data-fetching layer drastically reduces duplicate payload weight over 
+  mobile data networks. For the POC, the application runs as a pure Nuxt SPA/static 
+  build with no backend server; Pinia and browser localStorage stand in for the 
+  Supabase and Row Level Security layer, simulating tenant isolation and persistence 
+  entirely on the client.
+
+* Suggested Folder Layout (Skeleton)
+  app/platform/          — main domain only (org CRUD, plans, analytics)
+  app/portal/            — public member-facing pages
+  app/console/           — staff operations dashboard
+  app/modules/intake/    — intake plugin (routes, store, nav)
+  app/modules/payments/  — payments plugin
+  app/modules/ledger/    — ledger plugin
+  app/modules/polls/     — polls plugin
+  app/modules/broadcasts/— broadcasts plugin
+  app/core/              — auth, tenant, rbac, landing
+  data/terminology/      — default.json and optional overrides/{orgSlug}.json
+
+* Inferred Modern Tooling Stack
+  - Styling & UI Components: Tailwind CSS v4 paired with Nuxt UI v4. This unified 
+    stack provides accessible component primitives for the member portal while 
+    offering responsive, professional dashboard layouts for the operations console 
+    out of the box.
+  - Database & Real-time Layer: Supabase (PostgreSQL) in production. Supabase handles 
+    immediate syncing for live poll results via WebSockets and applies strict 
+    PostgreSQL Row Level Security (RLS) scoped by organization_id to ensure member 
+    information and sensitive intake case identities remain strictly confidential 
+    and accessible only to authorized staff. In POC mode, this role is emulated 
+    client-side via Pinia stores persisted to localStorage, with Supabase noted as 
+    the production target.
+  - State Management: Pinia. Pinia caches persistent client preferences, such as the 
+    user's language setting, accessibility configurations, and temporary session 
+    drafts for payment or intake requests.
+  - Asset & Performance Optimization: Nuxt Image v2 and built-in font self-hosting 
+    modules aggressively compress imagery and local assets on the fly. This limits 
+    initial page loads to a few kilobytes, allowing low-end smartphones on limited 
+    data allocation to load the app quickly.
+  - AI Engine Integration: Vercel AI SDK running via Nuxt Nitro server routes, 
+    interfacing with lightweight models like Llama 3 or Claude 3.5 Haiku. This handles 
+    multi-dialect sorting, sentiment flags, poll summaries, and automated tag 
+    creation without incurring massive API runtime costs.
+  - Payments (Future): PayMongo or Xendit for GCash/Maya-native payment rails.
+  - SMS (Future): Semaphore or Twilio for broadcast delivery and case status updates.
+
+
+6. MULTI-TENANCY & PLATFORM ARCHITECTURE
+--------------------------------------------------------------------------------
+Sandiwa OS operates as a multi-tenant platform: one unified codebase serving many 
+organizations, each with its own subdomain, users, landing page content, and 
+isolated operational data. The main domain hosts the Platform layer; each 
+registered organization receives a dedicated subdomain (e.g. greenfield-hoa.sandiwa.os 
+in production, or greenfield-hoa.sandiwa.localhost during local development).
+
+* Two-Tier Tenancy Model
+  The main domain (sandiwa.os or sandiwa.localhost) is the Platform context, 
+  accessible only to platform administrators. Each registered organization tenant 
+  lives on its own subdomain (e.g. bayanihan-coop.sandiwa.os), where org staff 
+  manage operations and members access the public "Impact" member portal. All 
+  tenants share the same feature modules and UI layout; only the data, enabled 
+  features, and landing content differ per organization.
+
+* Tenant Resolution
+  On every page load, a client-side hostname resolver reads the browser URL and 
+  maps it to an active tenant context. The first segment of a multi-part hostname 
+  (e.g. greenfield-hoa from greenfield-hoa.sandiwa.localhost) becomes the org 
+  slug. The bare main host (sandiwa.localhost or sandiwa.os) resolves to the 
+  "platform" context. This resolver drives which Pinia store data, routes, and UI 
+  mode are active for the current session.
+
+* Three Entry Flows
+  1. Register a New Organization — a platform admin (or onboarding wizard on the 
+     main domain) creates a new organization record (slug, name, contact, plan 
+     tier), enables feature plugins manually, provisions initial org staff accounts, 
+     and assigns a subdomain slug. UI labels resolve from default.json plus any 
+     optional per-org terminology override.
+  2. Staff Login on Organization Subdomain — an org staff member navigates to 
+     their organization subdomain and authenticates against that tenant's user roster.
+  3. Platform Admin Login — a platform administrator logs in on the main domain to 
+     manage all registered organizations, toggle features, and view cross-tenant 
+     analytics.
+
+* Optional Internal Hierarchy (Deferred — v2)
+  Within a tenant, organizations may define Units (e.g. building, phase, chapter) 
+  with unit_id scoping on members and cases. Units do not receive their own 
+  subdomains in v1; subdomain tenancy remains two-tier only.
+
+* Data Isolation
+  Each organization tenant owns its own users, landing page content, member records, 
+  intake cases, ledger entries, polls, and broadcast history. Every tenant-owned row 
+  carries organization_id. The platform layer holds the global organization directory, 
+  subscription tiers, feature-flag matrix, and platform-admin accounts. No org 
+  operational data is visible on the platform except through aggregated, anonymized 
+  analytics.
+
+
+7. ROLES, ACCESS CONTROL & RBAC
+--------------------------------------------------------------------------------
+Access in Sandiwa OS is strictly scoped by domain context and role. Platform 
+features and organization features are separate layers with no overlap in the UI. 
+Roles are configurable templates—not hardcoded titles—so each organization can 
+display officer names via terminology JSON while keeping a stable permission model.
+
+* Platform Administrators (Main Domain Only)
+  Platform admins exist exclusively on the main domain. They register and onboard 
+  new organizations, enable or disable feature plugins per org, manage subscription 
+  and plan tiers, perform platform-admin user CRUD, and view cross-org analytics. 
+  Platform admin credentials cannot be used to log in on an organization subdomain.
+
+* Organization Staff (Subdomain Only)
+  Org staff accounts are scoped to a single organization tenant and authenticate 
+  only on that organization's subdomain. Role templates (display titles resolved 
+  from terminology JSON):
+    - org_admin — full access to all enabled features and staff management within 
+      the tenant (display label: "Administrator" by default).
+    - manager — operations access: intake queues, payments, broadcasts, and reports 
+      (display label: "Manager" by default).
+    - committee_lead — access scoped to committee or unit assignments and relevant 
+      intake triage queues (display label: "Committee Lead" by default).
+    - staff — general operational access with permissions defined per enabled plugin.
+    - member — portal access only: own requests, votes, payments, and announcements.
+
+* Scope Dimensions
+  Permissions may be scoped to:
+    - organization — whole-tenant access
+    - unit — building, phase, or chapter (optional, deferred v2)
+    - module — single plugin only (e.g. intake, ledger)
+
+* Access Rules
+  Platform features sit above org features and are reachable only after main-domain 
+  platform login. Org features (intake, payments, ledger, polls, broadcasts, landing 
+  content management, org staff CRUD) are never exposed on the platform UI; instead, 
+  the platform admin toggles them on or off for each registered organization. A 
+  disabled plugin is hidden from both the operations console and the public member 
+  portal for that tenant.
+
+
+8. DATA MODEL, FEATURE CONFIGURATION & TERMINOLOGY
+--------------------------------------------------------------------------------
+The platform and organization layers maintain distinct feature sets. All CRUD 
+operations in the POC are handled client-side via Pinia stores persisted to 
+localStorage.
+
+* Platform Features (Main Domain — Platform Admin Only)
+  - Organization Registration & Onboarding: create/read/update/delete organization 
+    records (slug, name, address, contact, subscription tier, status). Optional 
+    terminologyOverrideSlug when a per-org override file exists in 
+    data/terminology/overrides/{orgSlug}.json.
+  - Per-Organization Feature Toggles: enable or disable each plugin per tenant 
+    (intake, payments, ledger, polls, broadcasts, landing content editor, org 
+    staff management).
+  - Platform Admin User CRUD: manage platform-level administrator accounts (name, 
+    email, role, status).
+  - Global Organization Directory: searchable list of all registered organizations 
+    with status, plan tier, and enabled-feature summary.
+  - Subscription & Plan Tiers: assign and update plan levels (e.g. Basic, Standard, 
+    Premium) that gate available feature plugins per organization.
+  - Cross-Organization Analytics: aggregated, anonymized metrics across tenants 
+    (total registered orgs, active plugins, intake volume trends, poll participation 
+    rates).
+
+* Organization Features (Per Tenant — Toggleable from Platform)
+  Each plugin below is available on the org subdomain only when enabled by the 
+  platform admin for that tenant:
+  - intake: CRUD on cases (member, category, sentiment, status, assigned staff, 
+    resolution notes).
+  - payments: CRUD on payment records, fee requests, and transaction status.
+  - ledger: CRUD on fund disbursements, repayments, and balance tracking.
+  - polls: CRUD on polls (title, options, eligibility rules, open/close dates, 
+    vote tallies, AI-generated summaries).
+  - broadcasts: CRUD on alerts (source, localized audio/infographic content, 
+    delivery status).
+  - Org Staff User CRUD: manage staff accounts within the tenant (name, email, 
+    role template, committee/unit assignment, status).
+  - Landing Page Content Management: edit the tenant's public-facing content fields.
+
+* Feature Configuration (Platform Admin)
+  Plugin enablement is per-org, set by the platform admin at creation or later. 
+  All organizations share the same generic default labels from default.json. A 
+  sensible POC platform default recommends intake, announcements, and polls for 
+  new orgs, but this is a platform default—not tied to any industry preset. 
+  Platform admins may enable any combination of plugins per tenant independently.
+
+* Per-Organization Landing Page Content Model (Rich, Configurable)
+  All organizations share the same "Impact" layout; content is tenant-specific:
+    - Organization name, logo, and accent colors
+    - Hero text and welcome message
+    - Leadership / officers list (name, position, photo, contact)
+    - Announcements and news feed
+    - Services list with icon-driven action panels (from enabled plugins only)
+    - Contact information (address, phone, email, office hours)
+    - Enabled-plugin tiles (only modules toggled on by the platform appear)
+
+* Inferred Data Entities (POC)
+  Platform scope: Organization, PlatformAdmin, SubscriptionPlan, FeatureFlagMatrix.
+  Tenant core scope: OrgProfile, Member, User, Role, Permission, Unit (optional), 
+  Announcement, LandingContent.
+  Plugin scope (per tenant): IntakeCase, PaymentRecord, LedgerEntry, Poll, 
+  BroadcastAlert.
+
+
+9. POC IMPLEMENTATION SKELETON (PINIA + LOCALSTORAGE)
+--------------------------------------------------------------------------------
+The Sandiwa OS proof-of-concept runs entirely in the browser with no backend server. 
+All interactivity, persistence, and tenant isolation are simulated client-side.
+
+* No-Backend Architecture
+  Pinia stores hold all application state: tenant context, authentication sessions, 
+  feature flags, organization records, staff accounts, and per-plugin operational 
+  data. Stores persist to browser localStorage so data survives page reloads during 
+  development and demo sessions. In production, these same store interfaces would 
+  be backed by Supabase with Row Level Security enforcing organization_id tenant 
+  boundaries.
+
+* Phased Build Order
+  Phase 0 — Platform Skeleton
+    Organization CRUD, subdomain tenant resolution, feature-flag matrix, platform 
+    admin login on main domain.
+  Phase 1 — Tenant Skeleton
+    Member portal landing, staff auth, announcements, leadership list, org staff 
+    management on org subdomain.
+  Phase 2 — First Plugin
+    Implement one plugin end-to-end (intake or payments) with toggle, RBAC, and 
+    tenant isolation proven before adding remaining plugins.
+
+* Seeded Mock Data
+  The POC ships with pre-seeded sample data to demonstrate multi-tenancy:
+    - greenfield-hoa — sample intake cases, payment records, and broadcast alert; 
+      plugins: intake, payments, polls, broadcasts.
+    - bayanihan-coop — ledger disbursements and poll data; plugins: payments, 
+      ledger, polls (different feature-flag set from greenfield-hoa).
+    - Both tenants display the same generic labels from default.json.
+    - A platform admin account on the main domain.
+    - Org staff accounts per tenant with role templates (org_admin, manager, 
+      committee_lead, staff).
+    - Default feature-flag sets showing different enabled plugins per organization.
+
+* Composables & Stores
+  - useTenant — resolves active org slug from hostname; exposes org config and 
+    enabled plugins to any component or page.
+  - useFeatures — gates routes, nav items, and UI tiles by enabled plugin keys.
+  - useTerminology — resolves label keys from default.json plus optional per-org 
+    override files at runtime.
+
+* Modern Architecture Notes
+  - Route guards enforce platform vs org context: platform routes reject org 
+    subdomain access and vice versa.
+  - Role guards check the authenticated user's role template and scope against the 
+    required permission for each plugin.
+  - Clear separation of platform routes (main domain) and org routes (subdomain) 
+    keeps the codebase maintainable as tenants scale.
+
+A. Subdomain Tenancy (Feasibility & Approach)
+   The subdomain approach is feasible for a Nuxt 4 + Pinia + localStorage POC and 
+   mirrors production multi-tenant patterns (analogous to a platform controller on 
+   the main domain and isolated tenant sites on subdomains).
+
+   * Tenant Detection
+     A client-only utility reads window.location.hostname on every navigation. For 
+     a hostname like greenfield-hoa.sandiwa.localhost, the first segment 
+     (greenfield-hoa) becomes the org slug. The bare main host (sandiwa.localhost) 
+     resolves to the "platform" context. This logic must run client-side only, as 
+     window and localStorage are unavailable during server-side rendering; the 
+     SPA/static POC build satisfies this constraint.
+
+   * Tenant Store Behavior
+     A Pinia tenant store holds the active slug, the loaded organization 
+     configuration (name, features, landing content, optional terminology override), 
+     and whether the current session belongs to a platform admin. On initialization, 
+     the store reads the slug from the hostname resolver and loads the matching 
+     organization record from the localStorage-simulated database. Platform admins 
+     can flip per-organization feature toggles; changes persist back to localStorage 
+     immediately.
+
+   * Route Guard Behavior
+     A global Nuxt middleware initializes the tenant store on every route change. If 
+     an organization subdomain is detected but no matching registered config exists 
+     in localStorage, the app treats the organization as unregistered and redirects 
+     to the main domain or displays a not-found state. When a valid tenant and 
+     authenticated session are present, the middleware selects the appropriate UI 
+     mode: the public "Impact" member portal for unauthenticated visitors, or the 
+     default-theme operations console for authenticated org staff.
+
+   * Local Development Setup
+     Modern browsers resolve *.localhost to 127.0.0.1 automatically, so manual 
+     /etc/hosts entries are usually optional. The practical requirement for local 
+     testing is configuring the Vite/Nuxt dev server to accept subdomain hostnames 
+     (via allowedHosts or server.host settings). As a fallback, developers may add 
+     explicit entries to /etc/hosts (Linux/Mac) or 
+     C:\Windows\System32\drivers\etc\hosts (Windows), mapping sandiwa.localhost and 
+     tenant subdomains (e.g. greenfield-hoa.sandiwa.localhost) to 127.0.0.1.
+
+   * Platform vs Tenant Analogy
+     sandiwa.localhost acts as the platform controller (managing all organizations, 
+     feature toggles, and analytics). Each organization subdomain (e.g. 
+     bayanihan-coop.sandiwa.localhost) acts as an isolated tenant with its own 
+     enabled plugins, staff logins, landing content, and operational data.
+
+
+Sandiwa OS transforms member-based community operations from paper logs and chat 
+groups into a modern, data-driven platform—empowering members of all technical 
+levels to engage with their organization seamlessly. Through its multi-tenant 
+architecture, one engine serves many organizations—each with its own digital 
+identity, terminology labels, and enabled plugins—while preserving a unified, 
+configurable, and transparent community operations experience across the Philippines.
+================================================================================
