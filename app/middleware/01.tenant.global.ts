@@ -1,17 +1,19 @@
 import { useTenantStore } from '~/stores/tenant'
 import { useAuthStore } from '~/stores/auth'
-import { usePlatformStore } from '~/stores/platform'
 import { stripTenantPathPrefix, tenantPath } from '~/core/tenant/domain'
 
-export default defineNuxtRouteMiddleware((to) => {
+export default defineNuxtRouteMiddleware(async (to) => {
   if (!import.meta.client) return
 
   const tenant = useTenantStore()
   const auth = useAuthStore()
-  const platform = usePlatformStore()
 
-  tenant.initialize()
-  platform.hydrate()
+  if (!tenant.initialized) {
+    await tenant.initialize()
+  }
+  if (!auth.hydrated) {
+    await auth.fetchMe()
+  }
   auth.validateSessionForContext()
 
   if (tenant.isOrganization && tenant.unknownOrg) {

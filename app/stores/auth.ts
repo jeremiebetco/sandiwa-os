@@ -1,26 +1,28 @@
 import { defineStore } from 'pinia'
-import type { SessionUser } from '~/core/types'
-import { loadDatabase } from '~/core/seed/service'
+import type { SessionUser, OrgRole } from '~/core/types'
 import { useTenantStore } from '~/stores/tenant'
-import { isStaffRole } from '~/core/rbac/permissions'
+import { isStaffRole, isMemberRole } from '~/core/rbac/permissions'
 
 interface AuthState {
   user: SessionUser | null
   isLoading: boolean
   error: string | null
+  hydrated: boolean
 }
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
     isLoading: false,
-    error: null
+    error: null,
+    hydrated: false
   }),
 
   getters: {
     isAuthenticated: state => !!state.user,
     isPlatformAdmin: state => state.user?.role === 'platform_admin',
-    isOrgStaff: state => !!state.user && state.user.context === 'organization' && isStaffRole(state.user.role as never)
+    isOrgStaff: state => !!state.user && state.user.context === 'organization' && isStaffRole(state.user.role as OrgRole),
+    isMember: state => !!state.user && state.user.context === 'organization' && isMemberRole(state.user.role as OrgRole)
   },
 
   actions: {
@@ -54,87 +56,79 @@ export const useAuthStore = defineStore('auth', {
       return true
     },
 
+    async fetchMe() {
+      try {
+        const res = await $fetch<{ user: SessionUser | null }>('/api/auth/me')
+        this.user = res.user
+        this.validateSessionForContext()
+      } catch {
+        this.user = null
+      } finally {
+        this.hydrated = true
+      }
+    },
+
     async loginPlatform(email: string, password: string): Promise<boolean> {
       this.isLoading = true
       this.error = null
-
       try {
         const tenant = useTenantStore()
         if (!tenant.isPlatform) {
           this.error = 'Platform login is only available on the main domain.'
           return false
         }
-
-        const db = loadDatabase()
-        const admin = db.platformAdmins.find(
-          a => a.email.toLowerCase() === email.toLowerCase() && a.status === 'active'
-        )
-
-        if (!admin || admin.password !== password) {
-          this.error = 'Invalid email or password.'
-          return false
-        }
-
-        this.user = {
-          id: admin.id,
-          email: admin.email,
-          name: admin.name,
-          role: admin.role,
-          context: 'platform'
-        }
+        const res = await $fetch<{ user: SessionUser }>('/api/auth/login', {
+          method: 'POST',
+          body: { email, password, context: 'platform' }
+        })
+        this.user = res.user
         return true
+      } catch (e: unknown) {
+        const err = e as { data?: { statusMessage?: string }, statusMessage?: string }
+        this.error = err?.data?.statusMessage || err?.statusMessage || 'Invalid email or password.'
+        return false
       } finally {
         this.isLoading = false
       }
     },
 
-    async loginOrg(email: string, password: string): Promise<boolean> {
+    async loginOrg(email: string, password: string, allowMember = false): Promise<boolean> {
       this.isLoading = true
       this.error = null
-
       try {
         const tenant = useTenantStore()
-        if (!tenant.isOrganization || !tenant.organization) {
+        if (!tenant.isOrganization || !tenant.slug) {
           this.error = 'Organization login is only available on an HOA subdomain.'
           return false
         }
-
-        const db = loadDatabase()
-        const orgUser = db.orgUsers.find(
-          u =>
-            u.organizationId === tenant.organization!.id
-            && u.email.toLowerCase() === email.toLowerCase()
-            && u.status === 'active'
-            && isStaffRole(u.role)
-        )
-
-        if (!orgUser || orgUser.password !== password) {
-          this.error = 'Invalid email or password.'
-          return false
-        }
-
-        this.user = {
-          id: orgUser.id,
-          email: orgUser.email,
-          name: orgUser.name,
-          role: orgUser.role,
-          context: 'organization',
-          organizationId: orgUser.organizationId,
-          organizationSlug: tenant.slug!
-        }
+        const res = await $fetch<{ user: SessionUser }>('/api/auth/login', {
+          method: 'POST',
+          body: {
+            email,
+            password,
+            context: 'organization',
+            orgSlug: tenant.slug,
+            allowMember
+          }
+        })
+        this.user = res.user
         return true
+      } catch (e: unknown) {
+        const err = e as { data?: { statusMessage?: string }, statusMessage?: string }
+        this.error = err?.data?.statusMessage || err?.statusMessage || 'Invalid email or password.'
+        return false
       } finally {
         this.isLoading = false
       }
     },
 
-    logout() {
+    async logout() {
+      try {
+        await $fetch('/api/auth/logout', { method: 'POST' })
+      } catch {
+        // clear locally anyway
+      }
       this.clearSession()
     }
-  },
-
-  persist: {
-    key: 'sandiwa-os-auth',
-    pick: ['user']
   }
 })

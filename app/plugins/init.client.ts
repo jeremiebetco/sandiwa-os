@@ -1,9 +1,8 @@
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin(async () => {
   const tenant = useTenantStore()
-  const platform = usePlatformStore()
   const auth = useAuthStore()
 
-  tenant.initialize()
-  platform.hydrate()
+  await tenant.initialize()
+  await auth.fetchMe()
   auth.validateSessionForContext()
 })

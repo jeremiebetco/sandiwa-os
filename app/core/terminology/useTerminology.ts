@@ -1,11 +1,21 @@
 import defaultTerminology from '~~/data/terminology/default.json'
-import greenfieldOverride from '~~/data/terminology/overrides/greenfield-hoa.json'
 import type { TerminologyFile } from '~/core/types'
 import { useTenantStore } from '~/stores/tenant'
 
-const OVERRIDES: Record<string, Partial<TerminologyFile>> = {
-  'greenfield-hoa': greenfieldOverride as Partial<TerminologyFile>
+const overrideModules = import.meta.glob('~~/data/terminology/overrides/*.json', { eager: true })
+
+function loadOverrides(): Record<string, Partial<TerminologyFile>> {
+  const map: Record<string, Partial<TerminologyFile>> = {}
+  for (const [path, mod] of Object.entries(overrideModules)) {
+    const slug = path.split('/').pop()?.replace(/\.json$/, '')
+    if (!slug) continue
+    const data = (mod as { default?: Partial<TerminologyFile> }).default ?? (mod as Partial<TerminologyFile>)
+    map[slug] = data
+  }
+  return map
 }
+
+const OVERRIDES = loadOverrides()
 
 function getByPath(obj: Record<string, unknown>, path: string): unknown {
   return path.split('.').reduce<unknown>((acc, key) => {
@@ -41,24 +51,33 @@ function deepMerge<T extends Record<string, unknown>>(base: T, override: Partial
 
 export function useTerminology() {
   const tenant = useTenantStore()
+  const { locale } = useI18n()
 
   const merged = computed(() => {
     const overrideSlug = tenant.organization?.terminologyOverrideSlug
     const base = defaultTerminology as unknown as Record<string, unknown>
+    let result = defaultTerminology as TerminologyFile
     if (overrideSlug && OVERRIDES[overrideSlug]) {
-      return deepMerge(base, OVERRIDES[overrideSlug] as Record<string, unknown>) as unknown as TerminologyFile
+      result = deepMerge(base, OVERRIDES[overrideSlug] as Record<string, unknown>) as unknown as TerminologyFile
     }
-    return defaultTerminology as TerminologyFile
+    // Locale-aware: prefer modules.{key}.label_{locale} if present in override/default
+    return { ...result, _locale: locale.value }
   })
 
   function t(key: string, fallback?: string): string {
+    const localeKey = `${key}_${locale.value}`
+    const localized = getByPath(merged.value as unknown as Record<string, unknown>, localeKey)
+    if (typeof localized === 'string') return localized
+
     const value = getByPath(merged.value as unknown as Record<string, unknown>, key)
     if (typeof value === 'string') return value
     if (value && typeof value === 'object' && 'label' in (value as object)) {
-      return String((value as { label: string }).label)
+      const labelObj = value as { label: string, label_tl?: string }
+      if (locale.value === 'tl' && labelObj.label_tl) return labelObj.label_tl
+      return String(labelObj.label)
     }
     return fallback ?? key.split('.').pop() ?? key
   }
 
-  return { t, terminology: merged }
+  return { t, terminology: merged, locale }
 }

@@ -1,7 +1,13 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "@fontsource-variable/sora/wght.css";
 @import "./tokens.css";
+@import "./brands/sandiwa.css";
+@import "./brands/greenfield.css";
+@import "./brands/sunrise.css";
+@import "./brands/tenant.css";
 
-@theme static {
-  --font-sans: var(--font-sans);
+@theme inline {
+  --font-sans: var(--brand-sans, 'Sora Variable', Sora, system-ui, sans-serif);
+  --font-display: var(--brand-display, 'Sora Variable', Sora, system-ui, sans-serif);
 }

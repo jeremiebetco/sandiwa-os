@@ -1,0 +1,19 @@
+html[data-brand='greenfield'] {
+  --brand-canvas: #e6efe4;
+  --brand-surface: #f4f8f2;
+  --brand-surface-raised: #ffffff;
+  --brand-muted: #d7e6d4;
+  --brand-ink: #152019;
+  --brand-ink-soft: #3a4d3e;
+  --brand-ink-muted: #5b6e5e;
+  --brand-accent: #1f6b3a;
+  --brand-accent-hover: #185530;
+  --brand-accent-muted: #d5eadc;
+  --brand-on-accent: #f4faf6;
+  --brand-border: #c3d6c0;
+  --brand-border-strong: #87a889;
+  --brand-header-from: #1f6b3a;
+  --brand-header-to: #164e2b;
+  --brand-sans: 'Sora Variable', Sora, system-ui, sans-serif;
+  --brand-display: 'Sora Variable', Sora, system-ui, sans-serif;
+}

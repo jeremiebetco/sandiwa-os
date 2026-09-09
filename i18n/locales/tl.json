@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "announcements": "Mga Anunsyo",
+    "requests": "Mga Kahilingan",
+    "payments": "Bayarin",
+    "votes": "Botohan",
+    "alerts": "Mga Alerto",
+    "portal": "Portal ng Miyembro",
+    "console": "Console ng Staff",
+    "login": "Mag-sign in",
+    "logout": "Mag-sign out",
+    "memberLogin": "Login ng Miyembro"
+  },
+  "home": {
+    "welcome": "Maligayang pagdating",
+    "officers": "Mga Opisyal",
+    "contact": "Kontak",
+    "services": "Mga Serbisyo"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Mag-sign in",
+    "staffTab": "Staff",
+    "memberTab": "Miyembro",
+    "invalid": "Mali ang email o password."
+  },
+  "portal": {
+    "title": "Portal ng Miyembro",
+    "statement": "Statement of account",
+    "clearance": "Clearance",
+    "myRequests": "Aking mga kahilingan",
+    "listen": "Pakinggan",
+    "stop": "Itigil"
+  },
+  "common": {
+    "loading": "Naglo-load…",
+    "empty": "Wala pang laman.",
+    "error": "May nangyaring mali.",
+    "save": "I-save",
+    "cancel": "Kanselahin",
+    "submit": "I-submit"
+  }
+}

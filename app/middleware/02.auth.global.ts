@@ -3,8 +3,7 @@ import { useTenantStore } from '~/stores/tenant'
 import { stripTenantPathPrefix, tenantPath } from '~/core/tenant/domain'
 
 const PLATFORM_PUBLIC = ['/platform/login']
-const ORG_PUBLIC = ['/', '/announcements', '/login', '/portal/requests', '/not-found']
-const ORG_MEMBER_ROUTES = ['/portal/requests']
+const ORG_PUBLIC = ['/', '/announcements', '/login', '/portal', '/not-found', '/alerts']
 
 export default defineNuxtRouteMiddleware((to) => {
   if (!import.meta.client) return
@@ -36,11 +35,16 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   if (tenant.isOrganization) {
-    const isPublic = ORG_PUBLIC.some(p => orgPath === p || orgPath.startsWith(p + '/'))
+    const isPublic = ORG_PUBLIC.some(p => orgPath === p || orgPath.startsWith(`${p}/`))
     const isConsole = orgPath.startsWith('/console')
+    const isMemberArea = orgPath.startsWith('/portal') || orgPath.startsWith('/alerts')
 
     if (isConsole && !auth.isOrgStaff) {
       return navigateTo(orgTo('/login'))
+    }
+
+    if (isMemberArea && !auth.isAuthenticated) {
+      return navigateTo(orgTo('/login?member=1'))
     }
 
     if (!isPublic && !isConsole && !auth.isAuthenticated) {
@@ -51,8 +55,8 @@ export default defineNuxtRouteMiddleware((to) => {
       return navigateTo(orgTo('/console'))
     }
 
-    if (ORG_MEMBER_ROUTES.some(r => orgPath.startsWith(r)) && auth.isOrgStaff && !orgPath.startsWith('/console')) {
-      // staff can still view portal but console is primary
+    if (orgPath === '/login' && auth.isMember) {
+      return navigateTo(orgTo('/portal'))
     }
   }
 })

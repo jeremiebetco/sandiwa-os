@@ -1,6 +1,11 @@
 name: ci
 
-on: push
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   ci:
@@ -10,6 +15,28 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node: ['24.18.0']
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sandiwa
+          POSTGRES_PASSWORD: sandiwa
+          POSTGRES_DB: sandiwa_os
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U sandiwa -d sandiwa_os"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://sandiwa_app:sandiwa@localhost:5433/sandiwa_os
+      DATABASE_URL_ADMIN: postgresql://sandiwa:sandiwa@localhost:5433/sandiwa_os
+      SESSION_SECRET: local-ci-session-secret-value-32chars-min
+      NUXT_PUBLIC_PLATFORM_DOMAIN: sandiwa.localhost
+      NUXT_PUBLIC_TENANT_ROUTING: auto
 
     steps:
       - name: Checkout
@@ -27,8 +54,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Migrate database
+        run: pnpm db:migrate
+
+      - name: Seed database
+        run: pnpm db:seed
+
       - name: Lint
         run: pnpm run lint
 
       - name: Typecheck
         run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

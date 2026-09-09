@@ -1,141 +1,206 @@
 import { defineStore } from 'pinia'
-import type { Announcement, AppDatabase, IntakeCase, Organization, OrgUser, PlanTier, PluginKey } from '~/core/types'
-import { PLAN_PLUGIN_LIMITS, PLUGIN_KEYS } from '~/core/types'
-import { createSeedDatabase } from '~/core/seed/data'
-import { loadDatabase, requestSeedReset, saveDatabase } from '~/core/seed/service'
+import type {
+  Announcement,
+  FeatureFlags,
+  IntakeCase,
+  Organization,
+  OrgUser,
+  PlanTier,
+  PluginKey
+} from '~/core/types'
+import { PLAN_PLUGIN_LIMITS } from '~/core/types'
 import { useTenantStore } from '~/stores/tenant'
 
 export const usePlatformStore = defineStore('platform', {
   state: () => ({
-    db: null as AppDatabase | null
+    organizations: [] as Organization[],
+    announcements: [] as Announcement[],
+    intakeCases: [] as IntakeCase[],
+    orgUsers: [] as OrgUser[],
+    analytics: {
+      totalOrgs: 0,
+      activeOrgs: 0,
+      totalIntakeCases: 0,
+      enabledPluginSlots: 0
+    },
+    loading: false,
+    error: null as string | null
   }),
 
-  getters: {
-    organizations(state): Organization[] {
-      return state.db?.organizations ?? []
-    },
-
-    analytics(state) {
-      const orgs = state.db?.organizations ?? []
-      const active = orgs.filter(o => o.status === 'active')
-      const intakeCount = state.db?.intakeCases.length ?? 0
-      const enabledPlugins = active.reduce((sum, org) => {
-        return sum + PLUGIN_KEYS.filter(k => org.features[k]).length
-      }, 0)
-      return {
-        totalOrgs: orgs.length,
-        activeOrgs: active.length,
-        totalIntakeCases: intakeCount,
-        enabledPluginSlots: enabledPlugins
-      }
-    }
-  },
-
   actions: {
-    hydrate() {
-      this.db = loadDatabase()
+    async hydrate() {
+      // no-op for API mode — data loaded on demand
     },
 
-    persist() {
-      if (this.db) saveDatabase(this.db)
+    async fetchOrganizations() {
+      const res = await $fetch<{ organizations: Organization[] }>('/api/platform/orgs')
+      this.organizations = res.organizations
+      return res.organizations
     },
 
-    resetDemoData() {
-      requestSeedReset()
-      this.db = createSeedDatabase()
-      saveDatabase(this.db)
-      useTenantStore().refreshOrganization()
+    async fetchAnalytics() {
+      const res = await $fetch<{ analytics: {
+        totalOrgs: number
+        activeOrgs: number
+        totalIntakeCases: number
+        enabledPluginSlots: number
+      } }>('/api/platform/analytics')
+      this.analytics = res.analytics
+      return res.analytics
     },
 
     getOrganizationBySlug(slug: string) {
-      return this.db?.organizations.find(o => o.slug === slug) ?? null
+      return this.organizations.find(o => o.slug === slug) ?? null
     },
 
-    createOrganization(payload: Omit<Organization, 'id'>) {
-      if (!this.db) this.hydrate()
-      const id = `org-${crypto.randomUUID().slice(0, 8)}`
-      const org: Organization = { ...payload, id }
-      this.db!.organizations.push(org)
-      this.persist()
-      return org
+    async createOrganization(payload: {
+      name: string
+      slug: string
+      address?: string
+      contactEmail?: string
+      contactPhone?: string
+      planTier?: PlanTier
+    }) {
+      const res = await $fetch<{ organization: Organization }>('/api/platform/orgs', {
+        method: 'POST',
+        body: payload
+      })
+      this.organizations.push(res.organization)
+      return res.organization
     },
 
-    updateOrganization(id: string, patch: Partial<Organization>) {
-      if (!this.db) this.hydrate()
-      const idx = this.db!.organizations.findIndex(o => o.id === id)
-      if (idx === -1) return null
-      const current = this.db!.organizations[idx]!
-      this.db!.organizations[idx] = { ...current, ...patch }
-      this.persist()
+    async updateOrganization(slug: string, patch: Partial<Organization>) {
+      const res = await $fetch<{ organization: Organization }>(`/api/platform/orgs/${slug}`, {
+        method: 'PATCH',
+        body: patch
+      })
+      const idx = this.organizations.findIndex(o => o.slug === slug)
+      if (idx !== -1) this.organizations[idx] = res.organization
       useTenantStore().refreshOrganization()
-      return this.db!.organizations[idx]
+      return res.organization
     },
 
-    updateFeatures(orgId: string, features: Organization['features']) {
-      return this.updateOrganization(orgId, { features })
+    async updateFeatures(slug: string, features: FeatureFlags) {
+      const res = await $fetch<{ organization: Organization }>(`/api/platform/orgs/${slug}/features`, {
+        method: 'PATCH',
+        body: { features }
+      })
+      const idx = this.organizations.findIndex(o => o.slug === slug)
+      if (idx !== -1) this.organizations[idx] = res.organization
+      useTenantStore().refreshOrganization()
+      return res.organization
     },
 
-    getOrgUsers(orgId: string): OrgUser[] {
-      return this.db?.orgUsers.filter(u => u.organizationId === orgId) ?? []
+    async resetDemoData() {
+      await $fetch('/api/platform/reset-demo', { method: 'POST' })
+      await this.fetchOrganizations()
+      useTenantStore().refreshOrganization()
     },
 
-    upsertOrgUser(user: OrgUser) {
-      if (!this.db) this.hydrate()
-      const idx = this.db!.orgUsers.findIndex(u => u.id === user.id)
-      if (idx === -1) {
-        this.db!.orgUsers.push(user)
-      } else {
-        this.db!.orgUsers[idx] = user
+    async fetchAnnouncements(slug: string) {
+      const res = await $fetch<{ announcements: Announcement[] }>(`/api/tenants/${slug}/announcements`)
+      this.announcements = res.announcements
+      return res.announcements
+    },
+
+    async upsertAnnouncement(slug: string, announcement: Partial<Announcement> & { title: string, body: string }) {
+      const res = await $fetch<{ announcement: Announcement }>(`/api/tenants/${slug}/announcements`, {
+        method: 'POST',
+        body: announcement
+      })
+      const idx = this.announcements.findIndex(a => a.id === res.announcement.id)
+      if (idx === -1) this.announcements.unshift(res.announcement)
+      else this.announcements[idx] = res.announcement
+      return res.announcement
+    },
+
+    async deleteAnnouncement(slug: string, id: string) {
+      await $fetch(`/api/tenants/${slug}/announcements/${id}`, { method: 'DELETE' })
+      this.announcements = this.announcements.filter(a => a.id !== id)
+    },
+
+    async fetchIntakeCases(slug: string) {
+      const res = await $fetch<{ cases: IntakeCase[] }>(`/api/tenants/${slug}/intake`)
+      this.intakeCases = res.cases
+      return res.cases
+    },
+
+    async upsertIntakeCase(slug: string, caseItem: Partial<IntakeCase> & { description: string, category: string }) {
+      if (caseItem.id) {
+        const res = await $fetch<{ case: IntakeCase }>(`/api/tenants/${slug}/intake/${caseItem.id}`, {
+          method: 'PATCH',
+          body: caseItem
+        })
+        const idx = this.intakeCases.findIndex(c => c.id === res.case.id)
+        if (idx !== -1) this.intakeCases[idx] = res.case
+        return res.case
       }
-      this.persist()
+      const res = await $fetch<{ case: IntakeCase }>(`/api/tenants/${slug}/intake`, {
+        method: 'POST',
+        body: caseItem
+      })
+      this.intakeCases.unshift(res.case)
+      return res.case
     },
 
-    deleteOrgUser(userId: string) {
-      if (!this.db) this.hydrate()
-      this.db!.orgUsers = this.db!.orgUsers.filter(u => u.id !== userId)
-      this.persist()
+    async fetchOrgUsers(slug: string) {
+      const res = await $fetch<{ users: OrgUser[] }>(`/api/tenants/${slug}/users`)
+      this.orgUsers = res.users
+      return res.users
     },
 
-    getAnnouncements(orgId: string): Announcement[] {
-      return (this.db?.announcements.filter(a => a.organizationId === orgId) ?? [])
-        .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
+    async upsertOrgUser(slug: string, user: OrgUser & { password?: string }) {
+      const res = await $fetch<{ user: OrgUser }>(`/api/tenants/${slug}/users`, {
+        method: 'POST',
+        body: user
+      })
+      const idx = this.orgUsers.findIndex(u => u.id === res.user.id)
+      if (idx === -1) this.orgUsers.push(res.user)
+      else this.orgUsers[idx] = res.user
+      return res.user
     },
 
-    upsertAnnouncement(announcement: Announcement) {
-      if (!this.db) this.hydrate()
-      const idx = this.db!.announcements.findIndex(a => a.id === announcement.id)
-      if (idx === -1) {
-        this.db!.announcements.push(announcement)
-      } else {
-        this.db!.announcements[idx] = announcement
+    async deleteOrgUser(slug: string, userId: string) {
+      await $fetch(`/api/tenants/${slug}/users/${userId}`, { method: 'DELETE' })
+      this.orgUsers = this.orgUsers.filter(u => u.id !== userId)
+    },
+
+    async updateLanding(slug: string, landing: Organization['landing']) {
+      const res = await $fetch<{ landing: Organization['landing'] }>(`/api/tenants/${slug}/landing`, {
+        method: 'PATCH',
+        body: { landing }
+      })
+      const tenant = useTenantStore()
+      if (tenant.organization) {
+        tenant.organization = {
+          ...tenant.organization,
+          landing: res.landing
+        }
       }
-      this.persist()
-    },
-
-    deleteAnnouncement(id: string) {
-      if (!this.db) this.hydrate()
-      this.db!.announcements = this.db!.announcements.filter(a => a.id !== id)
-      this.persist()
-    },
-
-    getIntakeCases(orgId: string): IntakeCase[] {
-      return (this.db?.intakeCases.filter(c => c.organizationId === orgId) ?? [])
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    },
-
-    upsertIntakeCase(caseItem: IntakeCase) {
-      if (!this.db) this.hydrate()
-      const idx = this.db!.intakeCases.findIndex(c => c.id === caseItem.id)
-      if (idx === -1) {
-        this.db!.intakeCases.push(caseItem)
-      } else {
-        this.db!.intakeCases[idx] = caseItem
+      const idx = this.organizations.findIndex(o => o.slug === slug)
+      const existing = idx !== -1 ? this.organizations[idx] : undefined
+      if (existing) {
+        this.organizations[idx] = {
+          ...existing,
+          landing: res.landing
+        }
       }
-      this.persist()
+      return res.landing
     },
 
     allowedPluginsForPlan(plan: PlanTier): PluginKey[] {
       return PLAN_PLUGIN_LIMITS[plan]
+    },
+
+    // Compat wrappers used by older pages during migration
+    getAnnouncements(_orgId: string): Announcement[] {
+      return this.announcements
+    },
+    getIntakeCases(_orgId: string): IntakeCase[] {
+      return this.intakeCases
+    },
+    getOrgUsers(_orgId: string): OrgUser[] {
+      return this.orgUsers
     }
   }
 })

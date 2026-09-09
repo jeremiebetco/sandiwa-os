@@ -10,22 +10,38 @@
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
-    "seed:reset": "node scripts/seed-reset.mjs"
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx server/db/migrate.ts",
+    "db:seed": "tsx server/db/seed.ts",
+    "db:reset": "tsx server/db/reset.ts",
+    "db:fresh": "pnpm db:reset && pnpm db:migrate && pnpm db:seed",
+    "db:setup": "pnpm db:up && sleep 3 && pnpm db:migrate && pnpm db:seed",
+    "db:studio": "drizzle-kit studio",
+    "db:export-supabase": "tsx server/db/export-supabase-sql.ts"
   },
   "dependencies": {
+    "@fontsource-variable/sora": "^5.3.0",
     "@iconify-json/lucide": "^1.2.114",
     "@iconify-json/simple-icons": "^1.2.87",
     "@nuxt/ui": "^4.9.0",
+    "@nuxtjs/i18n": "^10.6.0",
     "@pinia/nuxt": "^0.11.3",
+    "drizzle-orm": "^0.45.2",
     "nuxt": "^4.4.8",
     "pinia": "^3.0.4",
-    "pinia-plugin-persistedstate": "^4.7.1",
-    "tailwindcss": "^4.3.1"
+    "postgres": "^3.4.9",
+    "tailwindcss": "^4.3.1",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
     "@types/node": "^26.1.0",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^10.6.0",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10",
     "vue-tsc": "^3.3.5"

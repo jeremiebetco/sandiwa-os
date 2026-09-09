@@ -4,19 +4,33 @@ import { sanitizeText } from '~/core/utils/sanitize'
 
 definePageMeta({ layout: 'console' })
 
-const { organization } = useTenant()
+const { slug } = useTenant()
 const { user } = useAuth()
 const platform = usePlatformStore()
 
-const announcements = computed(() => {
-  if (!organization.value) return []
-  return platform.getAnnouncements(organization.value.id)
-})
+const loading = ref(true)
+const error = ref('')
+const saving = ref(false)
+
+const announcements = computed(() => platform.announcements)
 
 const showForm = ref(false)
 const editing = ref<Announcement | null>(null)
 const form = reactive({ title: '', body: '' })
 const formError = ref('')
+
+onMounted(async () => {
+  if (!slug.value) return
+  loading.value = true
+  error.value = ''
+  try {
+    await platform.fetchAnnouncements(slug.value)
+  } catch {
+    error.value = 'Failed to load announcements.'
+  } finally {
+    loading.value = false
+  }
+})
 
 function openCreate() {
   editing.value = null
@@ -34,39 +48,58 @@ function openEdit(item: Announcement) {
   showForm.value = true
 }
 
-function save() {
-  if (!organization.value || !user.value) return
+async function save() {
+  if (!slug.value || !user.value) return
   if (!form.title.trim() || !form.body.trim()) {
     formError.value = 'Title and body are required.'
     return
   }
-  const item: Announcement = {
-    id: editing.value?.id ?? `ann-${crypto.randomUUID().slice(0, 8)}`,
-    organizationId: organization.value.id,
-    title: sanitizeText(form.title, 200),
-    body: sanitizeText(form.body),
-    publishedAt: editing.value?.publishedAt ?? new Date().toISOString(),
-    authorId: user.value.id
+  saving.value = true
+  formError.value = ''
+  try {
+    await platform.upsertAnnouncement(slug.value, {
+      id: editing.value?.id,
+      title: sanitizeText(form.title, 200),
+      body: sanitizeText(form.body)
+    })
+    showForm.value = false
+  } catch (e: unknown) {
+    const err = e as { data?: { statusMessage?: string }, statusMessage?: string }
+    formError.value = err?.data?.statusMessage || err?.statusMessage || 'Failed to save announcement.'
+  } finally {
+    saving.value = false
   }
-  platform.upsertAnnouncement(item)
-  showForm.value = false
 }
 
-function remove(id: string) {
-  platform.deleteAnnouncement(id)
+async function remove(id: string) {
+  if (!slug.value) return
+  try {
+    await platform.deleteAnnouncement(slug.value, id)
+  } catch {
+    error.value = 'Failed to delete announcement.'
+  }
 }
 </script>
 
 <template>
-  <div>
-    <div class="mb-6 flex items-center justify-between">
-      <h2 class="text-2xl font-semibold">
-        Announcements
-      </h2>
-      <UButton @click="openCreate">
+  <div class="space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h2 class="display-title text-3xl">
+          Announcements
+        </h2>
+        <p class="mt-1 text-sm text-[var(--text-muted)]">
+          Publish updates to the public community site.
+        </p>
+      </div>
+      <button type="button" class="btn-brand" @click="openCreate">
         New announcement
-      </UButton>
+      </button>
     </div>
+
+    <p v-if="error" class="mb-4 text-sm text-[var(--color-danger)]" role="alert">
+      {{ error }}
+    </p>
 
     <div v-if="showForm" class="shell-surface mb-6 p-6">
       <h3 class="font-semibold">
@@ -83,17 +116,21 @@ function remove(id: string) {
           {{ formError }}
         </p>
         <div class="flex gap-2">
-          <UButton type="submit">
-            Save
-          </UButton>
-          <UButton variant="ghost" @click="showForm = false">
+          <button type="submit" class="btn-brand" :disabled="saving">
+            {{ saving ? 'Saving…' : 'Save' }}
+          </button>
+          <button type="button" class="btn-quiet" @click="showForm = false">
             Cancel
-          </UButton>
+          </button>
         </div>
       </form>
     </div>
 
-    <div class="shell-surface overflow-hidden">
+    <div v-if="loading" class="shell-surface p-8 text-center shell-text-muted">
+      Loading announcements…
+    </div>
+
+    <div v-else class="shell-surface overflow-hidden">
       <table class="w-full text-left text-sm">
         <thead class="bg-[var(--bg-muted)]">
           <tr>
@@ -119,12 +156,12 @@ function remove(id: string) {
               {{ new Date(item.publishedAt).toLocaleDateString() }}
             </td>
             <td class="px-4 py-3 text-right">
-              <UButton size="xs" variant="ghost" @click="openEdit(item)">
+              <button type="button" class="btn-quiet btn-sm mr-1" @click="openEdit(item)">
                 Edit
-              </UButton>
-              <UButton size="xs" variant="ghost" color="error" @click="remove(item.id)">
+              </button>
+              <button type="button" class="btn-danger btn-sm" @click="remove(item.id)">
                 Delete
-              </UButton>
+              </button>
             </td>
           </tr>
           <tr v-if="!announcements.length">

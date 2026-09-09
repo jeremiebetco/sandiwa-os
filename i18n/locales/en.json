@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "announcements": "Announcements",
+    "requests": "Requests",
+    "payments": "Payments",
+    "votes": "Votes",
+    "alerts": "Alerts",
+    "portal": "Member portal",
+    "console": "Staff console",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "memberLogin": "Member login"
+  },
+  "home": {
+    "welcome": "Welcome",
+    "officers": "Leadership",
+    "contact": "Contact",
+    "services": "Services"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "staffTab": "Staff",
+    "memberTab": "Member",
+    "invalid": "Invalid email or password."
+  },
+  "portal": {
+    "title": "Member portal",
+    "statement": "Statement of account",
+    "clearance": "Clearance",
+    "myRequests": "My requests",
+    "listen": "Listen",
+    "stop": "Stop"
+  },
+  "common": {
+    "loading": "Loading…",
+    "empty": "Nothing here yet.",
+    "error": "Something went wrong.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit"
+  }
+}

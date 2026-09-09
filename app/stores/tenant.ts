@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import type { Organization, TenantContext } from '~/core/types'
 import { parseTenantRoutingConfig } from '~/core/tenant/domain'
 import { resolveTenantFromHostname } from '~/core/tenant/resolver'
-import { loadDatabase } from '~/core/seed/service'
 
 interface TenantState {
   initialized: boolean
@@ -12,6 +11,7 @@ interface TenantState {
   routingMode: TenantRoutingMode
   organization: Organization | null
   unknownOrg: boolean
+  loading: boolean
 }
 
 export const useTenantStore = defineStore('tenant', {
@@ -22,7 +22,8 @@ export const useTenantStore = defineStore('tenant', {
     hostname: '',
     routingMode: 'subdomain',
     organization: null,
-    unknownOrg: false
+    unknownOrg: false,
+    loading: false
   }),
 
   getters: {
@@ -32,7 +33,7 @@ export const useTenantStore = defineStore('tenant', {
   },
 
   actions: {
-    initialize() {
+    async initialize() {
       const config = useRuntimeConfig()
       const configuredDomain = (config.public.platformDomain as string) || undefined
       const routingConfig = parseTenantRoutingConfig(config.public.tenantRouting as string | undefined)
@@ -51,24 +52,29 @@ export const useTenantStore = defineStore('tenant', {
       this.organization = null
 
       if (resolution.context === 'organization' && resolution.slug) {
-        const db = loadDatabase()
-        const org = db.organizations.find(o => o.slug === resolution.slug && o.status === 'active')
-        if (org) {
-          this.organization = org
-        } else {
-          this.unknownOrg = true
-        }
+        await this.loadOrganization(resolution.slug)
       }
 
       this.initialized = true
     },
 
-    refreshOrganization() {
+    async loadOrganization(slug: string) {
+      this.loading = true
+      try {
+        const res = await $fetch<{ organization: Organization }>(`/api/tenants/${slug}`)
+        this.organization = res.organization
+        this.unknownOrg = false
+      } catch {
+        this.organization = null
+        this.unknownOrg = true
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async refreshOrganization() {
       if (!this.slug) return
-      const db = loadDatabase()
-      const org = db.organizations.find(o => o.slug === this.slug && o.status === 'active')
-      this.organization = org ?? null
-      this.unknownOrg = !org
+      await this.loadOrganization(this.slug)
     }
   }
 })

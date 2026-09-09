@@ -6,13 +6,13 @@ const { buildPlatformUrl } = useTenantDomain()
 
 <template>
   <div class="py-16 text-center">
-    <h1 class="text-2xl font-bold">
+    <h1 class="display-title text-3xl">
       Organization not found
     </h1>
-    <p class="mt-2 shell-text-muted">
-      This HOA subdomain is not registered on Sandiwa OS.
+    <p class="mt-3 text-[var(--text-muted)]">
+      This HOA subdomain is not registered on Sandiwa.
     </p>
-    <a :href="buildPlatformUrl()" class="mt-6 inline-block text-[var(--bg-accent)] hover:underline">
+    <a :href="buildPlatformUrl()" class="btn-brand mt-8 inline-flex">
       Go to platform
     </a>
   </div>

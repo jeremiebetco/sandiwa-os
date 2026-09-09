@@ -1,0 +1,19 @@
+html[data-brand='sunrise'] {
+  --brand-canvas: #eceff2;
+  --brand-surface: #f7f8fa;
+  --brand-surface-raised: #ffffff;
+  --brand-muted: #e1e5ea;
+  --brand-ink: #1a1d22;
+  --brand-ink-soft: #454a53;
+  --brand-ink-muted: #6a717c;
+  --brand-accent: #8b5429;
+  --brand-accent-hover: #6f4220;
+  --brand-accent-muted: #f0e4d8;
+  --brand-on-accent: #fbf6f1;
+  --brand-border: #d0d5dc;
+  --brand-border-strong: #9aa3ae;
+  --brand-header-from: #8b5429;
+  --brand-header-to: #5c3618;
+  --brand-sans: 'Sora Variable', Sora, system-ui, sans-serif;
+  --brand-display: 'Sora Variable', Sora, system-ui, sans-serif;
+}

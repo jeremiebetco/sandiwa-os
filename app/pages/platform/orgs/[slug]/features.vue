@@ -9,16 +9,46 @@ const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 const org = computed(() => platform.getOrganizationBySlug(slug.value))
 
+const loading = ref(true)
+const saving = ref(false)
+const error = ref('')
 const localFeatures = ref<FeatureFlags | null>(null)
 
-watch(org, (value) => {
-  if (value) localFeatures.value = { ...value.features }
-}, { immediate: true })
+onMounted(async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    if (!org.value) {
+      await platform.fetchOrganizations()
+    }
+    if (org.value) {
+      localFeatures.value = { ...org.value.features }
+    }
+  } catch {
+    error.value = 'Failed to load organization.'
+  } finally {
+    loading.value = false
+  }
+})
 
-function save() {
-  if (org.value && localFeatures.value) {
-    platform.updateFeatures(org.value.id, localFeatures.value)
-    navigateTo('/platform/orgs')
+watch(org, (value) => {
+  if (value && !localFeatures.value) {
+    localFeatures.value = { ...value.features }
+  }
+})
+
+async function save() {
+  if (!org.value || !localFeatures.value) return
+  saving.value = true
+  error.value = ''
+  try {
+    await platform.updateFeatures(slug.value, localFeatures.value)
+    await navigateTo('/platform/orgs')
+  } catch (e: unknown) {
+    const err = e as { data?: { statusMessage?: string }, statusMessage?: string }
+    error.value = err?.data?.statusMessage || err?.statusMessage || 'Failed to save features.'
+  } finally {
+    saving.value = false
   }
 }
 
@@ -29,7 +59,10 @@ function isAllowed(plugin: typeof PLUGIN_KEYS[number]) {
 </script>
 
 <template>
-  <div v-if="org && localFeatures" class="shell-surface max-w-lg p-6">
+  <div v-if="loading" class="shell-surface max-w-lg p-6 shell-text-muted">
+    Loading features…
+  </div>
+  <div v-else-if="org && localFeatures" class="shell-surface max-w-lg p-6">
     <h2 class="text-xl font-semibold">
       Feature toggles — {{ org.name }}
     </h2>
@@ -47,13 +80,19 @@ function isAllowed(plugin: typeof PLUGIN_KEYS[number]) {
         >
       </li>
     </ul>
+    <p v-if="error" class="mt-4 text-sm text-[var(--color-danger)]" role="alert">
+      {{ error }}
+    </p>
     <div class="mt-6 flex gap-2">
-      <UButton @click="save">
+      <UButton :loading="saving" @click="save">
         Save toggles
       </UButton>
       <UButton variant="ghost" to="/platform/orgs">
         Back
       </UButton>
     </div>
+  </div>
+  <div v-else class="shell-text-muted">
+    {{ error || 'Organization not found.' }}
   </div>
 </template>

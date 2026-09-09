@@ -2,49 +2,55 @@
 definePageMeta({ layout: 'platform' })
 
 const platform = usePlatformStore()
-onMounted(() => platform.hydrate())
+const loading = ref(true)
+const error = ref('')
 const stats = computed(() => platform.analytics)
+
+onMounted(async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    await platform.fetchAnalytics()
+  } catch {
+    error.value = 'Failed to load analytics.'
+  } finally {
+    loading.value = false
+  }
+})
+
+const cards = computed(() => [
+  { label: 'Total HOAs', value: stats.value.totalOrgs },
+  { label: 'Active HOAs', value: stats.value.activeOrgs },
+  { label: 'Intake cases', value: stats.value.totalIntakeCases },
+  { label: 'Enabled modules', value: stats.value.enabledPluginSlots }
+])
 </script>
 
 <template>
   <div>
-    <h2 class="text-2xl font-semibold">
-      Cross-organization analytics
+    <h2 class="display-title text-3xl">
+      Analytics
     </h2>
-    <p class="text-sm shell-text-muted">
-      Aggregated, anonymized metrics across HOA tenants.
+    <p class="mt-1 text-sm text-[var(--text-muted)]">
+      Aggregated metrics across HOA tenants.
     </p>
-    <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="shell-surface p-6">
-        <p class="text-sm shell-text-muted">
-          Total HOAs
+    <p v-if="error" class="mt-4 text-sm text-[var(--color-danger)]" role="alert">
+      {{ error }}
+    </p>
+    <div v-if="loading" class="mt-8 shell-surface p-10 text-center text-[var(--text-muted)]">
+      Loading analytics…
+    </div>
+    <div v-else class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        v-for="card in cards"
+        :key="card.label"
+        class="shell-surface p-6"
+      >
+        <p class="text-sm text-[var(--text-muted)]">
+          {{ card.label }}
         </p>
-        <p class="text-3xl font-bold">
-          {{ stats.totalOrgs }}
-        </p>
-      </div>
-      <div class="shell-surface p-6">
-        <p class="text-sm shell-text-muted">
-          Active HOAs
-        </p>
-        <p class="text-3xl font-bold">
-          {{ stats.activeOrgs }}
-        </p>
-      </div>
-      <div class="shell-surface p-6">
-        <p class="text-sm shell-text-muted">
-          Intake cases (all tenants)
-        </p>
-        <p class="text-3xl font-bold">
-          {{ stats.totalIntakeCases }}
-        </p>
-      </div>
-      <div class="shell-surface p-6">
-        <p class="text-sm shell-text-muted">
-          Enabled plugin slots
-        </p>
-        <p class="text-3xl font-bold">
-          {{ stats.enabledPluginSlots }}
+        <p class="display-title mt-2 text-4xl">
+          {{ card.value }}
         </p>
       </div>
     </div>

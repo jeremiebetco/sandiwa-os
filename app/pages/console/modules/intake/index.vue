@@ -5,19 +5,18 @@ import { sanitizeText } from '~/core/utils/sanitize'
 
 definePageMeta({ layout: 'console' })
 
-const { organization } = useTenant()
+const { slug } = useTenant()
 const { user } = useAuth()
 const { t } = useTerminology()
 const platform = usePlatformStore()
 
+const loading = ref(true)
+const error = ref('')
 const statusFilter = ref<IntakeStatus | 'all'>('all')
 const selectedCase = ref<IntakeCase | null>(null)
 const resolutionNotes = ref('')
 
-const allCases = computed(() => {
-  if (!organization.value) return []
-  return platform.getIntakeCases(organization.value.id)
-})
+const allCases = computed(() => platform.intakeCases)
 
 const visibleCases = computed(() => {
   const role = user.value?.role as OrgRole
@@ -32,9 +31,24 @@ const visibleCases = computed(() => {
   return list
 })
 
-const staffOptions = computed(() => {
-  if (!organization.value) return []
-  return platform.getOrgUsers(organization.value.id).filter(u => u.role !== 'member')
+const staffOptions = computed(() =>
+  platform.orgUsers.filter(u => u.role !== 'member')
+)
+
+onMounted(async () => {
+  if (!slug.value) return
+  loading.value = true
+  error.value = ''
+  try {
+    await Promise.all([
+      platform.fetchIntakeCases(slug.value),
+      platform.fetchOrgUsers(slug.value)
+    ])
+  } catch {
+    error.value = 'Failed to load intake queue.'
+  } finally {
+    loading.value = false
+  }
 })
 
 function openCase(item: IntakeCase) {
@@ -44,39 +58,55 @@ function openCase(item: IntakeCase) {
   resolutionNotes.value = item.resolutionNotes ?? ''
 }
 
-function assignTo(staffId: string) {
-  if (!selectedCase.value) return
+async function assignTo(staffId: string) {
+  if (!selectedCase.value || !slug.value) return
   const staff = staffOptions.value.find(s => s.id === staffId)
-  const updated: IntakeCase = {
-    ...selectedCase.value,
-    assignedToId: staffId,
-    assignedToName: staff?.name,
-    status: 'in_progress',
-    updatedAt: new Date().toISOString()
+  try {
+    const updated = await platform.upsertIntakeCase(slug.value, {
+      id: selectedCase.value.id,
+      description: selectedCase.value.description,
+      category: selectedCase.value.category,
+      assignedToId: staffId,
+      assignedToName: staff?.name,
+      status: 'in_progress'
+    })
+    selectedCase.value = updated
+  } catch {
+    error.value = 'Failed to assign case.'
   }
-  platform.upsertIntakeCase(updated)
-  selectedCase.value = updated
 }
 
-function updateStatus(status: IntakeStatus) {
-  if (!selectedCase.value) return
-  const updated: IntakeCase = {
-    ...selectedCase.value,
-    status,
-    resolutionNotes: sanitizeText(resolutionNotes.value),
-    updatedAt: new Date().toISOString()
+async function updateStatus(status: IntakeStatus) {
+  if (!selectedCase.value || !slug.value) return
+  try {
+    const updated = await platform.upsertIntakeCase(slug.value, {
+      id: selectedCase.value.id,
+      description: selectedCase.value.description,
+      category: selectedCase.value.category,
+      status,
+      resolutionNotes: sanitizeText(resolutionNotes.value)
+    })
+    selectedCase.value = updated
+  } catch {
+    error.value = 'Failed to update case status.'
   }
-  platform.upsertIntakeCase(updated)
-  selectedCase.value = updated
 }
 </script>
 
 <template>
-  <div>
-    <h2 class="text-2xl font-semibold">
-      {{ t('modules.intake.navLabel') }} queue
-    </h2>
-    <div class="mt-4 flex gap-2">
+  <div class="space-y-6">
+    <div>
+      <h2 class="display-title text-3xl">
+        {{ t('modules.intake.navLabel') }} queue
+      </h2>
+      <p class="mt-1 text-sm text-[var(--text-muted)]">
+        Triage member requests and assign staff.
+      </p>
+    </div>
+    <p v-if="error" class="text-sm text-[var(--color-danger)]" role="alert">
+      {{ error }}
+    </p>
+    <div class="flex gap-2">
       <USelect
         v-model="statusFilter"
         :items="[
@@ -89,7 +119,11 @@ function updateStatus(status: IntakeStatus) {
       />
     </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-2">
+    <div v-if="loading" class="mt-6 shell-surface p-8 text-center shell-text-muted">
+      Loading intake queue…
+    </div>
+
+    <div v-else class="mt-6 grid gap-6 lg:grid-cols-2">
       <div class="shell-surface overflow-hidden">
         <table class="w-full text-left text-sm">
           <thead class="bg-[var(--bg-muted)]">
@@ -121,8 +155,13 @@ function updateStatus(status: IntakeStatus) {
                   {{ item.description }}
                 </p>
               </td>
-              <td class="px-4 py-3 capitalize">
-                {{ item.status.replace('_', ' ') }}
+              <td class="px-4 py-3">
+                <span
+                  class="status-badge capitalize"
+                  :class="`status-badge--${item.status === 'in_progress' ? 'pending' : item.status}`"
+                >
+                  {{ item.status.replace('_', ' ') }}
+                </span>
               </td>
               <td class="px-4 py-3 capitalize">
                 {{ item.sentiment }}
@@ -160,15 +199,15 @@ function updateStatus(status: IntakeStatus) {
             <UTextarea v-model="resolutionNotes" :rows="3" class="w-full" />
           </UFormField>
           <div class="flex flex-wrap gap-2">
-            <UButton size="sm" @click="updateStatus('in_progress')">
+            <button type="button" class="btn-brand btn-sm" @click="updateStatus('in_progress')">
               In progress
-            </UButton>
-            <UButton size="sm" @click="updateStatus('resolved')">
+            </button>
+            <button type="button" class="btn-quiet btn-sm" @click="updateStatus('resolved')">
               Resolved
-            </UButton>
-            <UButton size="sm" variant="outline" @click="updateStatus('closed')">
+            </button>
+            <button type="button" class="btn-quiet btn-sm" @click="updateStatus('closed')">
               Close
-            </UButton>
+            </button>
           </div>
         </div>
       </div>

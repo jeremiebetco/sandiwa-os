@@ -6,6 +6,10 @@ export function isStaffRole(role: OrgRole): boolean {
   return STAFF_ROLES.includes(role)
 }
 
+export function isMemberRole(role: OrgRole): boolean {
+  return role === 'member'
+}
+
 const MODULE_PERMISSIONS: Record<PluginKey, OrgRole[]> = {
   intake: ['org_admin', 'manager', 'committee_lead', 'staff'],
   payments: ['org_admin', 'manager', 'staff'],
@@ -31,4 +35,29 @@ export function canManageIntakeCase(role: OrgRole, assignedToId?: string, userId
     return assignedToId === userId
   }
   return role === 'staff'
+}
+
+export type ActionPermission
+  = | 'payment.post'
+    | 'payment.verify'
+    | 'voucher.approve'
+    | 'poll.close'
+    | 'poll.create'
+    | 'broadcast.send'
+    | 'clearance.review'
+    | 'invoice.generate'
+
+const ACTION_PERMISSIONS: Record<ActionPermission, OrgRole[]> = {
+  'payment.post': ['org_admin', 'manager', 'staff', 'member'],
+  'payment.verify': ['org_admin', 'manager', 'staff'],
+  'voucher.approve': ['org_admin', 'manager'],
+  'poll.close': ['org_admin', 'manager'],
+  'poll.create': ['org_admin', 'manager', 'committee_lead'],
+  'broadcast.send': ['org_admin', 'manager'],
+  'clearance.review': ['org_admin', 'manager', 'staff'],
+  'invoice.generate': ['org_admin', 'manager']
+}
+
+export function canPerformAction(role: OrgRole, action: ActionPermission): boolean {
+  return ACTION_PERMISSIONS[action]?.includes(role) ?? false
 }
