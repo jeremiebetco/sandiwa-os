@@ -39,13 +39,15 @@ drizzle/meta
 .vercel
 .turbo
 
+# Local agent skills (install via npx skills; do not commit)
+.agents/
+
 # Impeccable
 .impeccable/config.local.json
 .impeccable/cache/
 .impeccable/hook.cache.json
 .impeccable/hook.pending.json
 .cursor/skills/impeccable/scripts/bin/
-.agents/skills/impeccable/scripts/bin/
 
 # Generated marketing renders
 marketing/out/
