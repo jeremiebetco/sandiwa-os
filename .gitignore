@@ -1,24 +1,56 @@
-# Nuxt dev/build outputs
-.output
-.data
+# Nuxt / Node
+node_modules
 .nuxt
 .nitro
+.output
+.data
 .cache
 dist
-
-# Node dependencies
-node_modules
-
-# Logs
-logs
 *.log
-
-# Misc
+logs
 .DS_Store
-.fleet
-.idea
 
-# Local env files
+# Env
 .env
 .env.*
 !.env.example
+
+# IDE
+.idea
+.fleet
+.vscode/*
+!.vscode/extensions.json
+
+# Test / coverage
+coverage
+test-results
+playwright-report
+blob-report
+
+# Drizzle
+drizzle/meta
+
+# Local SQLite files (if created)
+*.db
+*.db-wal
+*.db-shm
+
+# Build artifacts
+.vercel
+.turbo
+
+# Local agent skills (install via npx skills; do not commit)
+.agents/
+
+# Impeccable
+.impeccable/config.local.json
+.impeccable/cache/
+.impeccable/hook.cache.json
+.impeccable/hook.pending.json
+.cursor/skills/impeccable/scripts/bin/
+
+# Generated marketing renders
+marketing/out/
+
+# Local temp scripts
+scripts/_tmp-preview.mjs
