@@ -1,0 +1,49 @@
+Sandiwa OS — HOA Edition
+Product brief
+
+Sandiwa, from “Isang Diwa” (one spirit): shared accountability across homeowners, board, and property staff.
+
+This repository is HOA-only. Terminology, seed data, and demos target subdivisions and condominiums (Greenfield Village HOA, Sunrise Condominium HOA). Cooperatives and generic associations are out of scope. This is not a government resident registry or LGU compliance system.
+
+Who it serves
+
+- Buyer: HOA board, property manager, or a developer offering a community portal.
+- Platform admin — register HOAs, plans, and feature toggles on the main domain (`/platform`).
+- Org staff — Operations Console (`/console`): org_admin, manager, committee_lead, staff.
+- Homeowner / unit occupant — Impact landing (`/`) and member portal (`/portal/*`).
+
+Three surfaces
+
+- Impact — member-facing org site: landing, announcements, EN/TL toggle, Listen on announcements / alerts / statement, member home for requests, statement, payments, votes, clearances, and alerts (`/alerts`).
+- Operations Console — authenticated staff desk. Modules appear only when the org’s plan and feature flags allow them, and only for roles in the permission matrix.
+- Platform — main domain only: HOA directory, org create/edit, feature toggles, light analytics. Demo data reset is local-only.
+
+Plugins (per org)
+
+Feature flags on each HOA, also capped by plan (basic / standard / premium):
+
+- intake — member requests; staff triage and assignment
+- payments — dues, manual payment submit (GCash / Maya / bank / cash / check), clearances, aging
+- ledger — accounts, disbursement vouchers, entries
+- polls — one vote per unit
+- broadcasts — portal alerts (info / warning / emergency)
+- announcements, staff_management, landing_editor — console tools
+
+Seed after `pnpm db:setup`:
+
+- greenfield-hoa — premium; ledger off; other plugins on
+- sunrise-condo — standard; ledger on; broadcasts off
+
+Roles
+
+- org_admin — full console, including staff management
+- manager — ops and money modules (not staff_management)
+- committee_lead — intake (assigned cases) and polls; can create polls, cannot close them
+- staff — intake, payments, announcements; can verify payments and review clearances
+- member — portal only; can submit a payment on their unit
+
+Not built (reserved env keys only): intake auto-triage, PayMongo / Xendit capture, SMS delivery.
+
+Sandiwa OS is the operating desk for Filipino homeowners associations: units, dues, requests, votes, and emergencies in one place — usable in Tagalog with large tap targets, and strict enough for a board that needs an audit trail.
+
+Run and security: README.md, SECURITY.md.

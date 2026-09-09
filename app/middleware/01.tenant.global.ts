@@ -1,0 +1,25 @@
+import { useTenantStore } from '~/stores/tenant'
+import { useAuthStore } from '~/stores/auth'
+import { stripTenantPathPrefix, tenantPath } from '~/core/tenant/domain'
+
+export default defineNuxtRouteMiddleware(async (to) => {
+  if (!import.meta.client) return
+
+  const tenant = useTenantStore()
+  const auth = useAuthStore()
+
+  if (!tenant.initialized) {
+    await tenant.initialize()
+  }
+  if (!auth.hydrated) {
+    await auth.fetchMe()
+  }
+  auth.validateSessionForContext()
+
+  if (tenant.isOrganization && tenant.unknownOrg) {
+    const { innerPath } = stripTenantPathPrefix(to.path)
+    if (innerPath !== '/not-found') {
+      return navigateTo(tenantPath('/not-found', tenant.slug, tenant.routingMode))
+    }
+  }
+})

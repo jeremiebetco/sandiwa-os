@@ -1,0 +1,20 @@
+/* Fallback pack for orgs without a named theme. Accent may be overridden at runtime. */
+html[data-brand='tenant'] {
+  --brand-canvas: #e8eee9;
+  --brand-surface: #f5f8f6;
+  --brand-surface-raised: #ffffff;
+  --brand-muted: #dce6df;
+  --brand-ink: #162019;
+  --brand-ink-soft: #3d4c41;
+  --brand-ink-muted: #5d6e62;
+  --brand-accent: var(--brand-accent-override, #1f6b3a);
+  --brand-accent-hover: color-mix(in srgb, var(--brand-accent) 82%, #000);
+  --brand-accent-muted: color-mix(in srgb, var(--brand-accent) 16%, #f5f8f6);
+  --brand-on-accent: #f4faf6;
+  --brand-border: #c5d4c9;
+  --brand-border-strong: #8aa593;
+  --brand-header-from: var(--brand-accent);
+  --brand-header-to: color-mix(in srgb, var(--brand-accent) 72%, #000);
+  --brand-sans: 'Sora Variable', Sora, system-ui, sans-serif;
+  --brand-display: 'Sora Variable', Sora, system-ui, sans-serif;
+}

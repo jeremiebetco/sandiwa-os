@@ -1,0 +1,63 @@
+# --- Runtime / build (never commit) ---
+node_modules/
+.nuxt/
+.nitro/
+.output/
+.data/
+.cache/
+dist/
+.vercel/
+.turbo/
+.pnpm-store/
+
+# --- Logs & OS ---
+logs/
+*.log
+.DS_Store
+Thumbs.db
+
+# --- Secrets (keep .env.example) ---
+.env
+.env.*
+!.env.example
+!.env.example.*
+*.pem
+*.p12
+*.key
+!*.key.example
+
+# --- Local DB / seed flags ---
+*.db
+*.db-wal
+*.db-shm
+.seed-reset-flag
+
+# --- IDE ---
+.idea/
+.fleet/
+.vscode/*
+!.vscode/extensions.json
+.cursor/
+
+# --- Local AI / agent workflow (not required to run or deploy) ---
+.agents/
+.claude/
+agent/
+data/skills/
+skills-lock.json
+agent_personas.md
+prompt_to_start.txt
+
+# --- Test / coverage ---
+coverage/
+test-results/
+playwright-report/
+blob-report/
+
+# --- Drizzle kit local meta (commit migrations SQL under server/db/) ---
+drizzle/meta/
+server/db/migrations/meta/
+
+# --- Generated / temp ---
+marketing/out/
+scripts/_tmp-*.mjs
