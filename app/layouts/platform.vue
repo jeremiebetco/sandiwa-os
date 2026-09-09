@@ -66,7 +66,7 @@ async function signOut() {
         <slot />
       </main>
     </div>
-    <main v-else class="mx-auto max-w-md px-4 py-12">
+    <main v-else class="mx-auto w-full max-w-6xl px-4 py-12 md:px-8">
       <slot />
     </main>
   </div>

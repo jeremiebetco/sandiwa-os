@@ -12,8 +12,8 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="mx-auto grid max-w-4xl gap-8 lg:grid-cols-2 lg:items-center">
-    <div class="hidden lg:block">
+  <div class="mx-auto grid w-full max-w-md gap-8 lg:max-w-4xl lg:grid-cols-2 lg:items-center">
+    <div class="hidden min-w-0 lg:block">
       <h2 class="display-title text-4xl">
         HOA operations, one platform.
       </h2>
@@ -22,7 +22,7 @@ async function onSubmit() {
       </p>
     </div>
 
-    <div class="shell-surface p-8">
+    <div class="shell-surface min-w-0 w-full p-8">
       <h2 class="display-title text-xl">
         Platform admin
       </h2>
