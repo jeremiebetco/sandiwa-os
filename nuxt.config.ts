@@ -107,10 +107,22 @@ export default defineNuxtConfig({
 
   hooks: {
     'pages:extend'(pages) {
+      // Platform-only marketing routes must not be cloned under /o/:tenantSlug.
+      const platformOnly = new Set([
+        '/product',
+        '/pricing',
+        '/stories',
+        '/contact',
+        '/privacy',
+        '/terms'
+      ])
+
       const tenantPages = pages
         .filter((page) => {
           const path = page.path ?? ''
-          return !path.startsWith('/platform') && !path.startsWith('/o/')
+          if (path.startsWith('/platform') || path.startsWith('/o/')) return false
+          if (platformOnly.has(path)) return false
+          return true
         })
         .map(page => ({
           ...page,

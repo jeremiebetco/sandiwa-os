@@ -1,8 +1,9 @@
 import { useAuthStore } from '~/stores/auth'
 import { useTenantStore } from '~/stores/tenant'
 import { stripTenantPathPrefix, tenantPath } from '~/core/tenant/domain'
+import { isPlatformMarketingPath, PLATFORM_PUBLIC_PATHS } from '~/core/platform/marketing'
 
-const PLATFORM_PUBLIC = ['/platform/login']
+const PLATFORM_PUBLIC = PLATFORM_PUBLIC_PATHS as readonly string[]
 const ORG_PUBLIC = ['/', '/announcements', '/login', '/portal', '/not-found', '/alerts']
 
 export default defineNuxtRouteMiddleware((to) => {
@@ -21,20 +22,19 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   if (tenant.isPlatform) {
-    const isPublic = PLATFORM_PUBLIC.includes(to.path) || to.path === '/'
+    const isPublic = PLATFORM_PUBLIC.includes(to.path)
     if (!isPublic && !auth.isPlatformAdmin) {
       return navigateTo('/platform/login')
-    }
-    if (to.path === '/' && !auth.isPlatformAdmin) {
-      return navigateTo('/platform/login')
-    }
-    if (to.path === '/' && auth.isPlatformAdmin) {
-      return navigateTo('/platform/orgs')
     }
     return
   }
 
   if (tenant.isOrganization) {
+    // Platform marketing pages must never appear on a tenant host.
+    if (isPlatformMarketingPath(orgPath) && orgPath !== '/') {
+      return navigateTo(orgTo('/'))
+    }
+
     const isPublic = ORG_PUBLIC.some(p => orgPath === p || orgPath.startsWith(`${p}/`))
     const isConsole = orgPath.startsWith('/console')
     const isMemberArea = orgPath.startsWith('/portal') || orgPath.startsWith('/alerts')

@@ -119,9 +119,22 @@ Impact sets `--status-broadcast-emergency-*` to `--action-emergency` / `--action
 | `/assets/officers/juan-dela-cruz.png` | Greenfield treasurer |
 | `/assets/officers/ana-reyes.png` | Greenfield secretary |
 | `/assets/officers/roberto-lim.png` | Sunrise board president |
+| `/assets/platform/hero.png` | Platform marketing hero photography |
+| `/assets/platform/product.png` | Platform product / lobby photography |
 | `/assets/og-image.png` | Social share / Open Graph |
 | `/assets/sandiwa-mark.png` | Brand mark |
 | `/assets/favicon.png` | Favicon |
+
+## Platform marketing
+
+Public on the platform host only (`/`, `/product`, `/pricing`, `/stories`, `/contact`, `/privacy`, `/terms`). Do not clone these routes under `/o/:tenantSlug`.
+
+- Nav height: `--platform-nav-height` (4rem), single line on desktop
+- Primary CTA label: **See a live HOA**; secondary: **Sign in** / **Open console**
+- Live demo strip uses Greenfield and Sunrise assets; no invented conversion percentages
+- Demo pricing must include the “billing is not live” disclaimer
+- Contact form validates client-side and does not store PII on the public demo
+- Admin Operate screens reuse Sandiwa tokens with denser list/matrix layouts (`.platform-org-row`, `.platform-feature-matrix`, `.platform-metric`)
 
 ## Invariants
 

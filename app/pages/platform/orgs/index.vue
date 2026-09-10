@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { BRANDS } from '~/core/branding/registry'
-
 definePageMeta({ layout: 'platform' })
 
 const platform = usePlatformStore()
@@ -10,11 +8,6 @@ const error = ref('')
 const resetting = ref(false)
 
 const orgs = computed(() => platform.organizations)
-const { buildTenantUrl, formatTenantHost } = useTenantDomain()
-
-function brandLabel(brandId: string) {
-  return BRANDS[brandId as keyof typeof BRANDS]?.label ?? brandId
-}
 
 onMounted(async () => {
   loading.value = true
@@ -49,14 +42,14 @@ async function resetDemo() {
   <div>
     <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h2 class="display-title text-3xl">
+        <h1 class="display-title text-3xl">
           Organizations
-        </h2>
+        </h1>
         <p class="mt-1 text-sm text-[var(--text-muted)]">
           Register and manage homeowners association tenants.
         </p>
       </div>
-      <div class="flex gap-2">
+      <div class="flex flex-wrap gap-2">
         <button
           type="button"
           class="btn-quiet text-sm"
@@ -76,53 +69,33 @@ async function resetDemo() {
       {{ error }}
     </p>
 
-    <div v-if="loading" class="shell-surface p-10 text-center text-[var(--text-muted)]">
-      Loading organizations…
+    <div v-if="loading" class="grid gap-3" aria-busy="true" aria-label="Loading organizations">
+      <div class="platform-skeleton" />
+      <div class="platform-skeleton" />
+      <div class="platform-skeleton" />
     </div>
 
-    <div v-else class="grid gap-4">
-      <article
+    <div v-else class="grid gap-3">
+      <PlatformOrgRow
         v-for="org in orgs"
         :key="org.id"
-        class="shell-surface p-6"
+        :org="org"
+      />
+      <div
+        v-if="!orgs.length"
+        class="shell-surface flex min-h-48 flex-col items-center justify-center gap-3 p-10 text-center"
       >
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex min-w-0 gap-4">
-            <BrandMark :name="org.name" :src="org.logoUrl" />
-            <div class="min-w-0">
-              <h3 class="display-title text-lg">
-                {{ org.name }}
-              </h3>
-              <p class="mt-1 text-sm text-[var(--text-muted)]">
-                <a
-                  :href="buildTenantUrl(org.slug)"
-                  class="font-medium text-[var(--bg-accent)] hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >{{ formatTenantHost(org.slug) }}</a>
-                <span class="text-[var(--text-muted)]"> / {{ org.planTier }} / {{ org.status }}</span>
-              </p>
-              <p class="mt-2 text-sm">
-                {{ org.address }}
-              </p>
-              <p class="mt-2 text-xs text-[var(--text-muted)]">
-                Brand: {{ brandLabel(org.landing.brandId) }}
-              </p>
-            </div>
-          </div>
-          <div class="flex gap-2">
-            <NuxtLink :to="`/platform/orgs/${org.slug}`" class="btn-quiet text-sm">
-              Edit
-            </NuxtLink>
-            <NuxtLink :to="`/platform/orgs/${org.slug}/features`" class="btn-quiet text-sm">
-              Features
-            </NuxtLink>
-          </div>
-        </div>
-      </article>
-      <p v-if="!orgs.length" class="py-12 text-center text-[var(--text-muted)]">
-        No organizations registered yet.
-      </p>
+        <UIcon name="i-lucide-building-2" class="size-8 text-[var(--text-muted)]" />
+        <p class="font-semibold">
+          No organizations registered yet
+        </p>
+        <p class="max-w-[36ch] text-sm text-[var(--text-muted)]">
+          Add the first HOA tenant to create a host, plan, and feature set.
+        </p>
+        <NuxtLink to="/platform/orgs/new" class="btn-brand text-sm">
+          Add HOA
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
