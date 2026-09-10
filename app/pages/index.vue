@@ -9,10 +9,7 @@ const loadingAnnouncements = ref(false)
 const announcements = computed(() => platform.announcements.slice(0, 3))
 
 onMounted(async () => {
-  if (isPlatform.value) {
-    await navigateTo('/platform/login')
-    return
-  }
+  if (isPlatform.value) return
   if (unknownOrg.value) {
     await navigateTo(tenantPath('/not-found'))
     return
@@ -27,6 +24,13 @@ onMounted(async () => {
     loadingAnnouncements.value = false
   }
 })
+
+if (isPlatform.value) {
+  useSeoMeta({
+    title: 'Sandiwa OS - HOA operations for Philippine communities',
+    description: 'Run dues, requests, votes, and member updates without the group-chat scramble. Open a live HOA demo.'
+  })
+}
 
 const services = computed(() => {
   if (!organization.value) return []
@@ -60,7 +64,8 @@ const services = computed(() => {
 </script>
 
 <template>
-  <div v-if="isOrganization && organization" class="space-y-12">
+  <PlatformMarketingHome v-if="isPlatform" />
+  <div v-else-if="isOrganization && organization" class="space-y-12">
     <section class="hero-panel shell-float">
       <div class="hero-panel__glow" aria-hidden="true" />
       <div class="grid lg:grid-cols-[1.1fr_0.9fr]">

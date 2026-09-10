@@ -6,6 +6,7 @@ definePageMeta({ layout: 'platform' })
 const platform = usePlatformStore()
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const { formatTenantHost } = useTenantDomain()
 
 const loading = ref(true)
 const saving = ref(false)
@@ -76,7 +77,7 @@ async function save() {
     await navigateTo('/platform/orgs')
   } catch (e: unknown) {
     const err = e as { data?: { statusMessage?: string }, statusMessage?: string }
-    error.value = err?.data?.statusMessage || err?.statusMessage || 'Failed to save organization.'
+    error.value = err?.data?.statusMessage || err?.statusMessage || 'Failed to update organization.'
   } finally {
     saving.value = false
   }
@@ -84,49 +85,97 @@ async function save() {
 </script>
 
 <template>
-  <div v-if="loading" class="shell-surface max-w-2xl p-6 shell-text-muted">
-    Loading organization…
-  </div>
-  <div v-else-if="org" class="shell-surface max-w-2xl p-6">
-    <h2 class="text-xl font-semibold">
-      Edit {{ org.name }}
-    </h2>
-    <form class="mt-6 space-y-4" @submit.prevent="save">
-      <UFormField label="Name">
-        <UInput v-model="form.name" class="w-full" />
-      </UFormField>
-      <UFormField label="Slug">
-        <UInput v-model="form.slug" disabled class="w-full" />
-      </UFormField>
-      <UFormField label="Address">
-        <UTextarea v-model="form.address" class="w-full" />
-      </UFormField>
-      <UFormField label="Contact email">
-        <UInput v-model="form.contactEmail" type="email" class="w-full" />
-      </UFormField>
-      <UFormField label="Contact phone">
-        <UInput v-model="form.contactPhone" class="w-full" />
-      </UFormField>
-      <UFormField label="Plan tier">
-        <USelect v-model="form.planTier" :items="['basic', 'standard', 'premium']" class="w-full" />
-      </UFormField>
-      <UFormField label="Status">
-        <USelect v-model="form.status" :items="['active', 'inactive']" class="w-full" />
-      </UFormField>
-      <p v-if="error" class="text-sm text-[var(--color-danger)]" role="alert">
-        {{ error }}
+  <div>
+    <div class="mb-6">
+      <NuxtLink to="/platform/orgs" class="text-sm font-medium text-[var(--bg-accent)] hover:underline">
+        Back to organizations
+      </NuxtLink>
+      <h1 class="display-title mt-3 text-3xl">
+        Edit organization
+      </h1>
+      <p class="mt-1 text-sm text-[var(--text-muted)]">
+        Update tenant details, plan, and status.
       </p>
-      <div class="flex gap-2 pt-4">
-        <UButton type="submit" :loading="saving">
-          Save
-        </UButton>
-        <UButton variant="ghost" to="/platform/orgs">
-          Cancel
-        </UButton>
+    </div>
+
+    <div v-if="loading" class="platform-skeleton" aria-busy="true" />
+
+    <form
+      v-else-if="org"
+      class="shell-surface grid gap-6 p-6 md:grid-cols-2"
+      @submit.prevent="save"
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="edit-name">Name</label>
+          <input id="edit-name" v-model="form.name" required class="field-input">
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="edit-slug">Slug</label>
+          <input id="edit-slug" v-model="form.slug" disabled class="field-input">
+          <p class="mt-1 text-xs text-[var(--text-muted)]">
+            {{ formatTenantHost(form.slug) }}
+          </p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="edit-address">Address</label>
+          <textarea id="edit-address" v-model="form.address" class="field-textarea" />
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="edit-email">Contact email</label>
+          <input id="edit-email" v-model="form.contactEmail" type="email" class="field-input">
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="edit-phone">Contact phone</label>
+          <input id="edit-phone" v-model="form.contactPhone" type="tel" class="field-input">
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="edit-plan">Plan tier</label>
+          <select id="edit-plan" v-model="form.planTier" class="field-input">
+            <option value="basic">
+              basic
+            </option>
+            <option value="standard">
+              standard
+            </option>
+            <option value="premium">
+              premium
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="edit-status">Status</label>
+          <select id="edit-status" v-model="form.status" class="field-input">
+            <option value="active">
+              active
+            </option>
+            <option value="inactive">
+              inactive
+            </option>
+          </select>
+        </div>
+        <p v-if="error" class="text-sm text-[var(--color-danger)]" role="alert">
+          {{ error }}
+        </p>
+        <div class="flex flex-wrap gap-2 pt-2">
+          <button type="submit" class="btn-brand" :disabled="saving">
+            {{ saving ? 'Saving…' : 'Save changes' }}
+          </button>
+          <NuxtLink :to="`/platform/orgs/${slug}/features`" class="btn-quiet">
+            Features
+          </NuxtLink>
+          <NuxtLink to="/platform/orgs" class="btn-quiet">
+            Cancel
+          </NuxtLink>
+        </div>
       </div>
     </form>
-  </div>
-  <div v-else class="shell-text-muted">
-    {{ error || (notFound ? 'Organization not found.' : 'Organization not found.') }}
+
+    <div v-else class="shell-surface p-8 text-[var(--text-muted)]">
+      {{ error || (notFound ? 'Organization not found.' : 'Organization not found.') }}
+    </div>
   </div>
 </template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FeatureFlags } from '~/core/types'
-import { PLUGIN_KEYS } from '~/core/types'
 
 definePageMeta({ layout: 'platform' })
 
@@ -13,6 +12,11 @@ const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
 const localFeatures = ref<FeatureFlags | null>(null)
+
+const allowedPlugins = computed(() => {
+  if (!org.value) return []
+  return platform.allowedPluginsForPlan(org.value.planTier)
+})
 
 onMounted(async () => {
   loading.value = true
@@ -51,48 +55,52 @@ async function save() {
     saving.value = false
   }
 }
-
-function isAllowed(plugin: typeof PLUGIN_KEYS[number]) {
-  if (!org.value) return false
-  return platform.allowedPluginsForPlan(org.value.planTier).includes(plugin)
-}
 </script>
 
 <template>
-  <div v-if="loading" class="shell-surface max-w-lg p-6 shell-text-muted">
-    Loading features…
-  </div>
-  <div v-else-if="org && localFeatures" class="shell-surface max-w-lg p-6">
-    <h2 class="text-xl font-semibold">
-      Feature toggles — {{ org.name }}
-    </h2>
-    <p class="mt-1 text-sm shell-text-muted">
-      Plan: {{ org.planTier }}. Plugins not in plan are disabled.
-    </p>
-    <ul class="mt-6 space-y-3">
-      <li v-for="plugin in PLUGIN_KEYS" :key="plugin" class="flex items-center justify-between gap-4">
-        <span class="capitalize">{{ plugin.replace('_', ' ') }}</span>
-        <input
-          v-model="localFeatures[plugin]"
-          type="checkbox"
-          :disabled="!isAllowed(plugin)"
-          class="size-5"
-        >
-      </li>
-    </ul>
-    <p v-if="error" class="mt-4 text-sm text-[var(--color-danger)]" role="alert">
-      {{ error }}
-    </p>
-    <div class="mt-6 flex gap-2">
-      <UButton :loading="saving" @click="save">
-        Save toggles
-      </UButton>
-      <UButton variant="ghost" to="/platform/orgs">
-        Back
-      </UButton>
+  <div>
+    <div class="mb-6">
+      <NuxtLink to="/platform/orgs" class="text-sm font-medium text-[var(--bg-accent)] hover:underline">
+        Back to organizations
+      </NuxtLink>
+      <h1 class="display-title mt-3 text-3xl">
+        Feature matrix
+      </h1>
+      <p v-if="org" class="mt-1 text-sm text-[var(--text-muted)]">
+        {{ org.name }} · {{ org.planTier }} plan. Plugins outside the plan stay locked.
+      </p>
     </div>
-  </div>
-  <div v-else class="shell-text-muted">
-    {{ error || 'Organization not found.' }}
+
+    <div v-if="loading" class="grid gap-3" aria-busy="true">
+      <div class="platform-skeleton" />
+      <div class="platform-skeleton" />
+      <div class="platform-skeleton" />
+    </div>
+
+    <div v-else-if="org && localFeatures" class="space-y-6">
+      <PlatformFeatureMatrix
+        v-model="localFeatures"
+        :plan-tier="org.planTier"
+        :allowed-plugins="allowedPlugins"
+      />
+      <p v-if="error" class="text-sm text-[var(--color-danger)]" role="alert">
+        {{ error }}
+      </p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn-brand" :disabled="saving" @click="save">
+          {{ saving ? 'Saving…' : 'Save toggles' }}
+        </button>
+        <NuxtLink :to="`/platform/orgs/${slug}`" class="btn-quiet">
+          Edit org
+        </NuxtLink>
+        <NuxtLink to="/platform/orgs" class="btn-quiet">
+          Cancel
+        </NuxtLink>
+      </div>
+    </div>
+
+    <div v-else class="shell-surface p-8 text-[var(--text-muted)]">
+      {{ error || 'Organization not found.' }}
+    </div>
   </div>
 </template>

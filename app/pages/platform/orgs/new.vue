@@ -51,42 +51,72 @@ async function create() {
 </script>
 
 <template>
-  <div class="shell-surface max-w-2xl p-6">
-    <h2 class="text-xl font-semibold">
-      Register new HOA
-    </h2>
-    <form class="mt-6 space-y-4" @submit.prevent="create">
-      <UFormField label="HOA name" required>
-        <UInput v-model="form.name" class="w-full" />
-      </UFormField>
-      <UFormField label="Subdomain slug" required>
-        <UInput v-model="form.slug" class="w-full" />
-        <p class="mt-1 text-xs shell-text-muted">
-          {{ formatTenantHost(form.slug || 'slug') }}
-        </p>
-      </UFormField>
-      <UFormField label="Address">
-        <UTextarea v-model="form.address" class="w-full" />
-      </UFormField>
-      <UFormField label="Contact email">
-        <UInput v-model="form.contactEmail" type="email" class="w-full" />
-      </UFormField>
-      <UFormField label="Contact phone">
-        <UInput v-model="form.contactPhone" class="w-full" />
-      </UFormField>
-      <UFormField label="Plan">
-        <USelect v-model="form.planTier" :items="['basic', 'standard', 'premium']" class="w-full" />
-      </UFormField>
-      <p v-if="formError" class="text-sm text-[var(--color-danger)]" role="alert">
-        {{ formError }}
+  <div>
+    <div class="mb-6">
+      <NuxtLink to="/platform/orgs" class="text-sm font-medium text-[var(--bg-accent)] hover:underline">
+        Back to organizations
+      </NuxtLink>
+      <h1 class="display-title mt-3 text-3xl">
+        Register new HOA
+      </h1>
+      <p class="mt-1 text-sm text-[var(--text-muted)]">
+        Creates a tenant host and default feature set for the selected plan.
       </p>
-      <div class="flex gap-2">
-        <UButton type="submit" :loading="saving">
-          Create HOA
-        </UButton>
-        <UButton variant="ghost" to="/platform/orgs">
-          Cancel
-        </UButton>
+    </div>
+
+    <form class="shell-surface grid gap-6 p-6 md:grid-cols-2" @submit.prevent="create">
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="hoa-name">HOA name</label>
+          <input id="hoa-name" v-model="form.name" required class="field-input">
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="hoa-slug">Subdomain slug</label>
+          <input id="hoa-slug" v-model="form.slug" required class="field-input">
+          <p class="mt-1 text-xs text-[var(--text-muted)]">
+            {{ formatTenantHost(form.slug || 'slug') }}
+          </p>
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="hoa-address">Address</label>
+          <textarea id="hoa-address" v-model="form.address" class="field-textarea" />
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="hoa-email">Contact email</label>
+          <input id="hoa-email" v-model="form.contactEmail" type="email" class="field-input">
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="hoa-phone">Contact phone</label>
+          <input id="hoa-phone" v-model="form.contactPhone" type="tel" class="field-input">
+        </div>
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="hoa-plan">Plan</label>
+          <select id="hoa-plan" v-model="form.planTier" class="field-input">
+            <option value="basic">
+              basic
+            </option>
+            <option value="standard">
+              standard
+            </option>
+            <option value="premium">
+              premium
+            </option>
+          </select>
+        </div>
+        <p v-if="formError" class="text-sm text-[var(--color-danger)]" role="alert">
+          {{ formError }}
+        </p>
+        <div class="flex flex-wrap gap-2 pt-2">
+          <button type="submit" class="btn-brand" :disabled="saving">
+            {{ saving ? 'Creating…' : 'Create HOA' }}
+          </button>
+          <NuxtLink to="/platform/orgs" class="btn-quiet">
+            Cancel
+          </NuxtLink>
+        </div>
       </div>
     </form>
   </div>
