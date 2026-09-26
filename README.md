@@ -2,7 +2,7 @@
 
 Multi-tenant homeowners association (HOA) operations platform for the Philippines. Nuxt 4 SPA with a Nitro API, **Postgres 16 + Drizzle ORM**, httpOnly session cookies, and row-level security for tenant isolation.
 
-> **Public demo only.** Sample orgs and accounts (`demo1234`) are shared. Do **not** enter real member, payment, or board data on a public deploy. See [SECURITY.md](SECURITY.md) before any production use.
+> **Public demo only.** Org sample accounts use shared password `demo1234`. Lock platform admin before a public deploy (`pnpm db:set-platform-password`). Do **not** enter real member, payment, or board data. See [SECURITY.md](SECURITY.md).
 
 ## Prerequisites
 
@@ -54,9 +54,13 @@ Impact includes EN/TL and Listen (announcements, alerts, member statement). Cons
 
 ## Demo accounts
 
-Password for all accounts: `demo1234` (login forms do **not** prefill the password).
+Org staff/member password: `demo1234` (login forms do **not** prefill the password).
 
-**Platform** (`sandiwa.localhost`): `admin@sandiwa.local`
+**Platform** (`/platform/login`): `admin@sandiwa.local` — password is **not** published. Local seed defaults to `demo1234`; for a public deploy run:
+
+```bash
+PLATFORM_ADMIN_PASSWORD='your-strong-secret' pnpm db:set-platform-password
+```
 
 **Greenfield staff** (role id in parentheses):
 

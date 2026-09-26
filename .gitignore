@@ -61,3 +61,4 @@ server/db/migrations/meta/
 # --- Generated / temp ---
 marketing/out/
 scripts/_tmp-*.mjs
+.env.vercel.local

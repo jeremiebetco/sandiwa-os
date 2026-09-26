@@ -7,7 +7,7 @@ useSeoMeta({
 })
 
 const { loginPlatform, isLoading, error } = useAuth()
-const email = ref('admin@sandiwa.local')
+const email = ref('')
 const password = ref('')
 
 async function onSubmit() {
@@ -41,9 +41,6 @@ async function onSubmit() {
       </h2>
       <p class="mt-2 text-sm text-[var(--text-muted)]">
         Use a platform admin account for this host.
-      </p>
-      <p class="mt-2 text-xs text-[var(--text-muted)]">
-        Demo hint: admin@sandiwa.local - password <code>demo1234</code> (not prefilled)
       </p>
       <form class="mt-6 space-y-4" @submit.prevent="onSubmit">
         <div>

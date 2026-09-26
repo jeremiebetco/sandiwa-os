@@ -1,5 +1,7 @@
 -- Sandiwa OS — demo seed (run third)
--- Demo login password for all accounts: demo1234
+-- Org staff/member demo password: demo1234
+-- Platform admin starts as demo1234 in this committed file — lock before public:
+--   PLATFORM_ADMIN_PASSWORD='…' pnpm db:set-platform-password
 
 TRUNCATE TABLE
   broadcast_deliveries, broadcasts, poll_votes, polls,

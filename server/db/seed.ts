@@ -31,7 +31,8 @@ const {
   units
 } = schema
 
-const DEMO_PASSWORD = 'demo1234'
+const { ORG_DEMO_PASSWORD, resolvePlatformAdminPassword } = await import('../utils/demo-passwords')
+
 const greenfieldId = 'org-greenfield-hoa'
 const sunriseId = 'org-sunrise-condo'
 
@@ -75,7 +76,10 @@ async function clearAll() {
 
 async function seed() {
   console.log('Seeding database...')
-  const passwordHash = await hashPassword(DEMO_PASSWORD)
+  const orgPassword = ORG_DEMO_PASSWORD
+  const platformPassword = resolvePlatformAdminPassword()
+  const passwordHash = await hashPassword(orgPassword)
+  const platformPasswordHash = await hashPassword(platformPassword)
 
   // Seed runs as app role with FORCE RLS — elevate to platform admin for writes
   await sqlClient.unsafe(`SELECT set_config('app.is_platform_admin', 'true', false)`)
@@ -153,7 +157,7 @@ async function seed() {
   await db.insert(platformAdmins).values({
     id: 'plat-1',
     email: 'admin@sandiwa.local',
-    passwordHash,
+    passwordHash: platformPasswordHash,
     name: 'Platform Administrator',
     status: 'active'
   })
@@ -255,7 +259,14 @@ async function seed() {
     { id: 'bd-2', organizationId: greenfieldId, broadcastId: 'bc-gf-1', recipientId: 'user-gf-member2', channel: 'portal', status: 'read', deliveredAt: new Date('2026-03-09T16:01:00Z') }
   ])
 
-  console.log('Seed complete. Demo password for all accounts:', DEMO_PASSWORD)
+  const platformLocked = platformPassword !== orgPassword
+  console.log('Seed complete.')
+  console.log('  Org staff/member demo password:', orgPassword)
+  console.log(
+    platformLocked
+      ? '  Platform admin password: set from PLATFORM_ADMIN_PASSWORD (not printed)'
+      : '  Platform admin password: same as org demo (set PLATFORM_ADMIN_PASSWORD before public deploy)'
+  )
   await sqlClient.end({ timeout: 5 })
 }
 
