@@ -1,5 +1,21 @@
-import { requirePlatformAdmin } from '~~/server/utils/auth'
+import type { H3Event } from 'h3'
+import { createSession, requirePlatformAdmin, setSessionCookie, type AuthSession } from '~~/server/utils/auth'
 import { isProductionRuntime } from '~~/server/utils/session-secret'
+
+/**
+ * `pnpm db:seed` truncates sessions. The caller is still on the platform page,
+ * so issue a fresh cookie or every later save returns 401 Unauthorized.
+ */
+async function restorePlatformSession(event: H3Event, session: AuthSession) {
+  const token = await createSession({
+    userId: session.userId,
+    context: 'platform',
+    role: session.role,
+    email: session.email,
+    name: session.name
+  })
+  setSessionCookie(event, token)
+}
 
 /**
  * Demo data reset — local/dev only.
@@ -7,7 +23,7 @@ import { isProductionRuntime } from '~~/server/utils/session-secret'
  * Enable locally with ALLOW_DEMO_RESET=true, then use `pnpm db:seed` via execFile.
  */
 export default defineEventHandler(async (event) => {
-  await requirePlatformAdmin(event)
+  const session = await requirePlatformAdmin(event)
 
   if (isProductionRuntime() || process.env.ALLOW_DEMO_RESET !== 'true') {
     throw createError({
@@ -30,6 +46,12 @@ export default defineEventHandler(async (event) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Seed failed'
     throw createError({ statusCode: 500, statusMessage: `Demo reset failed: ${message}` })
+  } finally {
+    try {
+      await restorePlatformSession(event, session)
+    } catch (restoreErr) {
+      console.error('Failed to restore platform session after demo reset', restoreErr)
+    }
   }
 
   return { ok: true }

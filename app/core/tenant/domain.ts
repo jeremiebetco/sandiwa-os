@@ -6,35 +6,33 @@ export type TenantRoutingConfig = 'auto' | TenantRoutingMode
 
 const DEV_PLATFORM_HOSTS = new Set(['localhost', '127.0.0.1'])
 
+function isLocalDevHost(host: string): boolean {
+  return DEV_PLATFORM_HOSTS.has(host) || host === DEFAULT_PLATFORM_DOMAIN || host.endsWith('.localhost')
+}
+
 export function getEffectivePlatformDomain(
   configuredDomain = DEFAULT_PLATFORM_DOMAIN,
   hostname?: string
 ): string {
   const configured = configuredDomain.toLowerCase()
+  const host = (hostname ?? (import.meta.client ? window.location.hostname : '')).toLowerCase()
 
-  if (configured !== DEFAULT_PLATFORM_DOMAIN) {
+  if (!host || isLocalDevHost(host)) {
+    return DEFAULT_PLATFORM_DOMAIN
+  }
+
+  // Tenant of the configured apex: greenfield.sandiwa.os → sandiwa.os
+  if (host !== configured && host.endsWith(`.${configured}`)) {
     return configured
   }
 
-  const host = (hostname ?? (import.meta.client ? window.location.hostname : '')).toLowerCase()
-  if (!host || host === DEFAULT_PLATFORM_DOMAIN || DEV_PLATFORM_HOSTS.has(host)) {
-    return DEFAULT_PLATFORM_DOMAIN
-  }
-
-  if (host.endsWith('.localhost')) {
-    return DEFAULT_PLATFORM_DOMAIN
-  }
-
-  const parts = host.split('.')
+  // slug.project.vercel.app → project.vercel.app
   if (host.endsWith('.vercel.app')) {
+    const parts = host.split('.')
     if (parts.length >= 4) {
       return parts.slice(1).join('.')
     }
     return host
-  }
-
-  if (parts.length >= 3) {
-    return parts.slice(1).join('.')
   }
 
   return host
@@ -47,7 +45,17 @@ export function inferTenantRoutingMode(
   const host = hostname.toLowerCase()
   const domain = platformDomain.toLowerCase()
 
+  if (isLocalDevHost(host) || isLocalDevHost(domain)) {
+    return 'subdomain'
+  }
+
   if (domain.endsWith('.vercel.app') || host.endsWith('.vercel.app')) {
+    return 'path'
+  }
+
+  // hoa-sandiwa-os.jet-byte.com cannot grow {slug}.that-host without extra DNS.
+  // A two-label apex (sandiwa.os) still uses subdomains.
+  if (domain.split('.').length >= 3) {
     return 'path'
   }
 

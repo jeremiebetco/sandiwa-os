@@ -145,7 +145,7 @@ Browser SPA  →  Nitro /api  →  Drizzle  →  Postgres (RLS)
 ```
 DATABASE_URL=...          # sandiwa_app via transaction pooler (port 6543)
 SESSION_SECRET=...
-NUXT_PUBLIC_PLATFORM_DOMAIN=your-app.vercel.app
+NUXT_PUBLIC_PLATFORM_DOMAIN=your-public-host
 ```
 
 Local Docker scripts (`pnpm db:setup`, etc.) are optional for laptop-only Postgres. After schema changes, regenerate SQL with `pnpm db:export-supabase`, then re-run the SQL files in Supabase.
