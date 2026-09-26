@@ -30,14 +30,15 @@ async function main() {
     .where(eq(platformAdmins.email, PLATFORM_EMAIL))
     .returning({ id: platformAdmins.id, email: platformAdmins.email })
 
-  if (updated.length === 0) {
+  const row = updated[0]
+  if (!row) {
     throw new Error(`No platform admin found for ${PLATFORM_EMAIL}. Run pnpm db:seed first.`)
   }
 
   // Invalidate existing platform sessions so old cookies cannot keep admin access.
   await sqlClient.unsafe(`DELETE FROM sessions WHERE context = 'platform'`)
 
-  console.log(`Updated password for ${updated[0].email} and cleared platform sessions.`)
+  console.log(`Updated password for ${row.email} and cleared platform sessions.`)
   console.log('Password value was not printed — store it in your password manager / Vercel env notes.')
   await sqlClient.end({ timeout: 5 })
 }
