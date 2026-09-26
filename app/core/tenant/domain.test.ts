@@ -17,6 +17,7 @@ import { resolveTenantFromHostname } from './resolver'
 
 const LOCAL = 'sandiwa.localhost'
 const VERCEL = 'sandiwa-os.vercel.app'
+const JET = 'hoa-sandiwa-os.jet-byte.com'
 
 describe('inferTenantRoutingMode', () => {
   it('uses path mode on vercel.app', () => {
@@ -25,6 +26,14 @@ describe('inferTenantRoutingMode', () => {
 
   it('uses subdomain mode on localhost', () => {
     expect(inferTenantRoutingMode('sandiwa.localhost', LOCAL)).toBe('subdomain')
+  })
+
+  it('uses path mode on a multi-label custom host', () => {
+    expect(inferTenantRoutingMode(JET, JET)).toBe('path')
+  })
+
+  it('uses subdomain mode on a two-label apex', () => {
+    expect(inferTenantRoutingMode('sandiwa.os', 'sandiwa.os')).toBe('subdomain')
   })
 })
 
@@ -60,6 +69,20 @@ describe('getEffectivePlatformDomain', () => {
 
   it('keeps localhost when browsing locally', () => {
     expect(getEffectivePlatformDomain('sandiwa.localhost', 'sandiwa.localhost')).toBe('sandiwa.localhost')
+  })
+
+  it('follows the host in the address bar when config still names the old Vercel app', () => {
+    expect(getEffectivePlatformDomain(VERCEL, JET)).toBe(JET)
+  })
+
+  it('keeps local links on sandiwa.localhost even if config names a public host', () => {
+    expect(getEffectivePlatformDomain(JET, LOCAL)).toBe(LOCAL)
+    expect(getEffectivePlatformDomain(VERCEL, 'localhost')).toBe(LOCAL)
+  })
+
+  it('keeps the configured apex for a tenant subdomain', () => {
+    expect(getEffectivePlatformDomain('sandiwa.os', 'greenfield-hoa.sandiwa.os')).toBe('sandiwa.os')
+    expect(getEffectivePlatformDomain(VERCEL, 'greenfield-hoa.sandiwa-os.vercel.app')).toBe(VERCEL)
   })
 })
 
@@ -126,6 +149,20 @@ describe('formatTenantHost', () => {
   it('formats path-based hostnames on Vercel', () => {
     expect(formatTenantHost('greenfield-hoa', VERCEL, 'path')).toBe('sandiwa-os.vercel.app/o/greenfield-hoa')
   })
+
+  it('builds the visible tenant link from whichever host you opened', () => {
+    const publicDomain = getEffectivePlatformDomain(VERCEL, JET)
+    const publicMode = inferTenantRoutingMode(JET, publicDomain)
+    expect(formatTenantHost('greenfield-hoa', publicDomain, publicMode)).toBe(
+      'hoa-sandiwa-os.jet-byte.com/o/greenfield-hoa'
+    )
+
+    const localDomain = getEffectivePlatformDomain(VERCEL, LOCAL)
+    const localMode = inferTenantRoutingMode(LOCAL, localDomain)
+    expect(formatTenantHost('greenfield-hoa', localDomain, localMode)).toBe(
+      'greenfield-hoa.sandiwa.localhost'
+    )
+  })
 })
 
 describe('buildTenantUrl', () => {
@@ -172,6 +209,14 @@ describe('resolveTenantFromHostname', () => {
       context: 'organization',
       slug: 'greenfield-hoa',
       routingMode: 'subdomain'
+    })
+  })
+
+  it('resolves /o/:slug on the current custom host even if config is the old Vercel domain', () => {
+    expect(resolveTenantFromHostname(JET, VERCEL, '/o/greenfield-hoa')).toMatchObject({
+      context: 'organization',
+      slug: 'greenfield-hoa',
+      routingMode: 'path'
     })
   })
 })
