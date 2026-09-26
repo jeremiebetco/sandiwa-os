@@ -4,11 +4,14 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { config } from 'dotenv'
 import { defaultLandingFor } from '../../app/core/branding/landing'
+import { ORG_DEMO_PASSWORD, resolvePlatformAdminPassword } from '../utils/demo-passwords'
 import { hashPassword } from '../utils/password'
 
+config()
+
 const outDir = join(process.cwd(), 'server/db/supabase')
-const DEMO_PASSWORD = 'demo1234'
 const greenfieldId = 'org-greenfield-hoa'
 const sunriseId = 'org-sunrise-condo'
 
@@ -53,7 +56,10 @@ async function main() {
     .map(f => readFileSync(join(process.cwd(), 'server/db/rls', f), 'utf8'))
     .join('\n\n')
 
-  const passwordHash = await hashPassword(DEMO_PASSWORD)
+  const orgPasswordHash = await hashPassword(ORG_DEMO_PASSWORD)
+  const platformPassword = resolvePlatformAdminPassword()
+  const platformPasswordHash = await hashPassword(platformPassword)
+  const platformLocked = platformPassword !== ORG_DEMO_PASSWORD
 
   const greenfieldLanding = defaultLandingFor('Greenfield Village HOA', {
     heroTitle: 'Welcome to Greenfield Village',
@@ -92,7 +98,10 @@ ${rlsFiles.replaceAll('__SANDIWA_APP_PASSWORD__', 'CHANGE_ME')}
 `
 
   const seedSql = `-- Sandiwa OS — demo seed (run third)
--- Demo login password for all accounts: ${DEMO_PASSWORD}
+-- Org staff/member demo password: ${ORG_DEMO_PASSWORD}
+-- Platform admin: ${platformLocked
+  ? 'hashed from PLATFORM_ADMIN_PASSWORD at export time (not demo1234)'
+  : `same as org demo unless you set PLATFORM_ADMIN_PASSWORD before export, then run pnpm db:set-platform-password on the live DB`}
 
 TRUNCATE TABLE
   broadcast_deliveries, broadcasts, poll_votes, polls,
@@ -107,12 +116,12 @@ INSERT INTO organizations (id, slug, name, address, contact_email, contact_phone
   (${sqlString(sunriseId)}, ${sqlString('sunrise-condo')}, ${sqlString('Sunrise Condominium HOA')}, ${sqlString('Sunrise Blvd, Makati City')}, ${sqlString('admin@sunrise-condo.local')}, ${sqlString('+63 2 876 5432')}, 'standard', 'active', NULL, ${sqlJson({ ...defaultFeatures, ledger: true, broadcasts: false })}, ${sqlJson(sunriseLanding)}, ${sqlString('/assets/orgs/sunrise-logo.png')}, ${sqlString('/assets/orgs/sunrise-hero.png')});
 
 INSERT INTO platform_admins (id, email, password_hash, name, status) VALUES
-  (${sqlString('plat-1')}, ${sqlString('admin@sandiwa.local')}, ${sqlString(passwordHash)}, ${sqlString('Platform Administrator')}, 'active');
+  (${sqlString('plat-1')}, ${sqlString('admin@sandiwa.local')}, ${sqlString(platformPasswordHash)}, ${sqlString('Platform Administrator')}, 'active');
 
 INSERT INTO org_users (id, organization_id, email, password_hash, name, role, unit_label, member_no, status) VALUES
-  (${sqlString('user-gf-admin')}, ${sqlString(greenfieldId)}, ${sqlString('admin@greenfield-hoa.local')}, ${sqlString(passwordHash)}, ${sqlString('Elena Garcia')}, 'org_admin', NULL, NULL, 'active'),
-  (${sqlString('user-gf-member')}, ${sqlString(greenfieldId)}, ${sqlString('member@greenfield-hoa.local')}, ${sqlString(passwordHash)}, ${sqlString('Pedro Ramos')}, 'member', ${sqlString('Block 3 Lot 12')}, ${sqlString('GF-0312')}, 'active'),
-  (${sqlString('user-sc-admin')}, ${sqlString(sunriseId)}, ${sqlString('admin@sunrise-condo.local')}, ${sqlString(passwordHash)}, ${sqlString('Grace Tan')}, 'org_admin', NULL, NULL, 'active');
+  (${sqlString('user-gf-admin')}, ${sqlString(greenfieldId)}, ${sqlString('admin@greenfield-hoa.local')}, ${sqlString(orgPasswordHash)}, ${sqlString('Elena Garcia')}, 'org_admin', NULL, NULL, 'active'),
+  (${sqlString('user-gf-member')}, ${sqlString(greenfieldId)}, ${sqlString('member@greenfield-hoa.local')}, ${sqlString(orgPasswordHash)}, ${sqlString('Pedro Ramos')}, 'member', ${sqlString('Block 3 Lot 12')}, ${sqlString('GF-0312')}, 'active'),
+  (${sqlString('user-sc-admin')}, ${sqlString(sunriseId)}, ${sqlString('admin@sunrise-condo.local')}, ${sqlString(orgPasswordHash)}, ${sqlString('Grace Tan')}, 'org_admin', NULL, NULL, 'active');
 
 INSERT INTO units (id, organization_id, code, phase, block, lot, tower, floor, unit_type, occupancy, owner_user_id, area_sqm, status) VALUES
   (${sqlString('unit-gf-0312')}, ${sqlString(greenfieldId)}, ${sqlString('B3-L12')}, ${sqlString('Phase 1')}, ${sqlString('3')}, ${sqlString('12')}, NULL, NULL, 'house', 'owner_occupied', ${sqlString('user-gf-member')}, 120.00, 'active'),
@@ -128,7 +137,15 @@ Run these **in order** in Supabase → **SQL Editor** → **New query**:
 
 1. \`01_schema.sql\` — creates tables
 2. \`02_rls.sql\` — edit \`CHANGE_ME\` to a password you choose, then run
-3. \`03_seed.sql\` — demo data (login password: \`${DEMO_PASSWORD}\`)
+3. \`03_seed.sql\` — demo data (org password: \`${ORG_DEMO_PASSWORD}\`)
+
+After seeding a **public** deploy, lock platform admin:
+
+\`\`\`bash
+PLATFORM_ADMIN_PASSWORD='your-strong-secret' pnpm db:set-platform-password
+\`\`\`
+
+(Uses \`DATABASE_URL_ADMIN\` against Supabase. Do not leave platform admin on \`${ORG_DEMO_PASSWORD}\`.)
 
 ## Vercel
 
@@ -138,6 +155,7 @@ Set \`DATABASE_URL\` to your Supabase **transaction pooler** URL (port 6543), wi
 - password: same value you used instead of \`CHANGE_ME\` in \`02_rls.sql\`
 
 Also set \`SESSION_SECRET\` and \`NUXT_PUBLIC_PLATFORM_DOMAIN\`.
+Leave \`DATABASE_URL_ADMIN\` and \`ALLOW_DEMO_RESET\` unset on Vercel.
 
 Regenerate these files after schema changes: \`pnpm db:export-supabase\`
 `

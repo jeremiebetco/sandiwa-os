@@ -6,7 +6,13 @@ Run these **in order** in Supabase → **SQL Editor** → **New query**:
 
 1. `01_schema.sql` — creates tables
 2. `02_rls.sql` — edit `CHANGE_ME` to a password you choose, then run
-3. `03_seed.sql` — demo data (login password: `demo1234`)
+3. `03_seed.sql` — demo data (org login password: `demo1234`)
+
+After a public deploy, lock platform admin:
+
+```bash
+PLATFORM_ADMIN_PASSWORD='your-strong-secret' pnpm db:set-platform-password
+```
 
 ## Vercel
 

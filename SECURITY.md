@@ -4,7 +4,8 @@
 
 This repository and any public Vercel deploy are a **pilot / portfolio demo**:
 
-- Demo accounts and password `demo1234` are intentional and documented.
+- Org staff/member accounts use shared password `demo1234` so visitors can try the product.
+- **Platform admin must not stay on `demo1234` on a public deploy** — set `PLATFORM_ADMIN_PASSWORD` and run `pnpm db:set-platform-password` (or seed with that env set).
 - Data may be reset; treat everything as disposable sample content.
 - **Do not store real homeowner PII, bank details, or production dues data** in the public demo.
 
@@ -43,8 +44,9 @@ Please do **not** open a public issue for exploitable flaws until a fix is avail
 
 1. Set a unique `SESSION_SECRET` (≥ 32 random chars; never `change-me…`)
 2. Set `DATABASE_URL` to the RLS-enforced `sandiwa_app` role (no localhost fallback)
-3. Change or remove all demo users / passwords after seed
+3. Lock platform admin with `PLATFORM_ADMIN_PASSWORD` + `pnpm db:set-platform-password`; change or remove org demo passwords after seed if the site is not a public try-it demo
 4. Keep `ALLOW_DEMO_RESET` unset in production
 5. Prefer a custom domain (not shared `*.vercel.app`) for cookie/CSRF clarity
 6. Add Redis/Upstash rate limiting if you run multiple serverless instances
 7. Extend Zod validation to remaining write endpoints as you harden
+8. Run `pnpm check:deploy-env` against pulled Vercel env (`vercel env pull`) before go-live
