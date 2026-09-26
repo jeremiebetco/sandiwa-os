@@ -42,6 +42,20 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // ssr:false defaults the icon provider to Iconify's CDN. Production CSP
+  // (connect-src 'self') blocks that, so icons render as empty boxes on the
+  // live host. Load them from this app and bundle the ones we reference.
+  icon: {
+    provider: 'server',
+    fallbackToApi: false,
+    clientBundle: {
+      scan: {
+        globInclude: ['**/*.{vue,ts,jsx,tsx,md,mdc,mdx,yml,yaml}']
+      },
+      sizeLimitKb: 512
+    }
+  },
+
   ui: {
     // Sandiwa brand packs are light-only; dark mode caused unreadable form controls.
     colorMode: false
