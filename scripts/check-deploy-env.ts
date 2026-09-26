@@ -8,7 +8,7 @@ import { resolve } from 'node:path'
 
 config({ path: process.env.DOTENV_CONFIG_PATH || resolve(process.cwd(), '.env') })
 
-type Check = { ok: boolean; detail: string }
+type Check = { ok: boolean, detail: string }
 
 function parseDbUrl(url: string | undefined, label: string): Check {
   if (!url?.trim()) {
@@ -21,11 +21,11 @@ function parseDbUrl(url: string | undefined, label: string): Check {
     const port = u.port || '(default)'
     const isSupabase = host.includes('supabase')
     const isAppRole = user === 'sandiwa_app' || user.startsWith('sandiwa_app.')
-    const isPrivileged =
-      user === 'postgres' ||
-      user.startsWith('postgres.') ||
-      user === 'sandiwa' ||
-      user.includes('service_role')
+    const isPrivileged
+      = user === 'postgres'
+        || user.startsWith('postgres.')
+        || user === 'sandiwa'
+        || user.includes('service_role')
 
     if (label === 'DATABASE_URL') {
       if (isPrivileged) {
@@ -75,9 +75,9 @@ const checks: Check[] = [
     ? (() => {
         const domain = process.env.NUXT_PUBLIC_PLATFORM_DOMAIN.trim()
         const isLocalhost = domain.includes('localhost')
-        const expectingProd =
-          process.env.VERCEL === '1' ||
-          (process.env.DOTENV_CONFIG_PATH || '').includes('vercel')
+        const expectingProd
+          = process.env.VERCEL === '1'
+            || (process.env.DOTENV_CONFIG_PATH || '').includes('vercel')
         if (isLocalhost && expectingProd) {
           return {
             ok: false,
